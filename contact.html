@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — VSF Tir Cible</title>
+<meta name="description" content="Contactez VSF Tir Cible, club de tir sportif à La Ferté-Bernard.">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .section-contact { position: relative; overflow: hidden; }
+  .section-contact::before {
+    content: ""; position: absolute; inset: 0; z-index: 0;
+    background-image: url("ImageSite/contact.jpg");
+    background-size: cover; background-position: center;
+    opacity: 0.16; pointer-events: none;
+  }
+  .section-contact > * { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div class="nav-conteneur">
+    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+    <button class="menu-toggle" aria-label="Ouvrir le menu">☰ Menu</button>
+    <ul class="nav-liens">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="contact.html" aria-current="page">Contact</a></li>
+      <li><a href="horaires-tarifs.html">Horaires &amp; Tarifs</a></li>
+      <li><a href="photos.html">Photos</a></li>
+      <li><a href="equipe.html">Équipe</a></li>
+      <li><a href="produits.html">Produits</a></li>
+      <li><a href="reservation.html">Réservation</a></li>
+    </ul>
+  </div>
+</header>
+
+
+<section class="section section-contact">
+  <div class="section-tete">
+    <p class="eyebrow">Contact</p>
+    <h2>Une question, une envie de découvrir le club&nbsp;?</h2>
+  </div>
+  <p>Écrivez-nous via le formulaire ci-dessous, ou contactez-nous directement par téléphone ou e-mail.</p>
+
+  <!-- Pour brancher un vrai envoi silencieux (sans ouvrir la messagerie du visiteur),
+       crée un compte gratuit sur https://formspree.io et remplace l'action ci-dessous
+       par ton URL Formspree. En attendant, ça ouvre la messagerie avec le message pré-rempli. -->
+  <form class="formulaire" action="mailto:stophe28@aol.com" method="post" enctype="text/plain">
+    <div class="champ"><label for="nom">Nom</label><input type="text" id="nom" name="nom" required></div>
+    <div class="champ"><label for="email">E-mail</label><input type="email" id="email" name="email" required></div>
+    <div class="champ"><label for="telephone">Téléphone</label><input type="tel" id="telephone" name="telephone"></div>
+    <div class="champ"><label for="message">Message</label><textarea id="message" name="message" rows="5" required></textarea></div>
+    <button type="submit" class="bouton bouton-plein" style="justify-self:start;border:none;cursor:pointer;">Envoyer</button>
+  </form>
+
+  <div class="infos-pratiques">
+    <div><h3>Adresse</h3><p>Champ Blanc<br>72400 La Ferté-Bernard</p></div>
+    <div><h3>Téléphone</h3><p><a href="tel:0607095592">06 07 09 55 92</a></p></div>
+    <div><h3>E-mail</h3><p><a href="mailto:stophe28@aol.com">stophe28@aol.com</a></p></div>
+    <div><h3>Horaires</h3><p>Mercredi 14h–18h<br>Dimanche 9h–12h</p></div>
+  </div>
+
+  <iframe class="carte-google" src="https://www.google.com/maps?q=Stand+de+tir,+72400+La+Fert%C3%A9-Bernard&output=embed" loading="lazy" title="Localisation de VSF Tir Cible"></iframe>
+  <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" target="_blank" rel="noopener" class="bouton bouton-vide" style="margin-top:1.5rem;">Itinéraire →</a>
+</section>
+
+<footer class="pied">
+  <div class="pied-conteneur">
+    <div class="pied-marque"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible"><div><strong>VSF Tir Cible</strong><br>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+    <div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+    <div>💬 <a href="contact.html">Nous contacter</a><br>🧭 <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" target="_blank" rel="noopener">Itinéraire</a></div>
+    <div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

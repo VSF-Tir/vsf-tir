@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex, nofollow">
+  <title>FICHE INDIVIDUELLE DE RENSEIGNEMENTS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --gap: 8px;
+      --border: 1px solid #000;
+      --font: "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: var(--font);
+      margin: 0;
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: auto;
+      padding: 16mm;
+      background: #fff;
+      color: #000;
+    }
+    h1 {
+      font-size: 20px;
+      text-align: center;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      flex: 1;
+    }
+    .header-logos {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .header-logos img { height: 90px; object-fit: contain; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: var(--gap);
+      margin-top: 8px;
+      align-items: end;
+    }
+    label { font-size: 14px; }
+    .field { display: flex; flex-direction: column; gap: 3px; }
+    input[type="text"], input[type="date"], input[type="email"], input[type="tel"], textarea {
+      border: var(--border); padding: 5px 6px; font-size: 14px; font-weight: bold;
+      width: 100%; min-height: 28px; background: #fff; color: #003366;
+    }
+    textarea { resize: none; height: 30px; }
+    .row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .choice { display: inline-flex; gap: 6px; align-items: center; margin-right: 10px; font-size: 14px; }
+    .licence-boxes { display: flex; gap: 8px; margin-top: 2px; }
+    .licence-boxes span { display: inline-block; width: 22px; height: 28px; border: 1px solid #000; }
+    .remarque { color: red; font-size: 14px; font-weight: bold; font-style: italic; }
+    @media print { .remarque { display: none; } }
+    .note { border: var(--border); padding: 8px 10px; font-size: 12px; margin-top: 8px; line-height: 1.3; background: #fafafa; }
+    .manual-line { margin-top: 6px; font-size: 14px; }
+    .actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+    button {
+      padding: 8px 12px; font-size: 14px; border: 0; border-radius: 4px; cursor: pointer;
+      background: #1f2937; color: #fff;
+    }
+    @media print {
+      @page { margin-top: 5mm; margin-bottom: 5mm; }
+      body { background: #fff; }
+      .page { border: none; margin: 0; padding: 10mm; }
+      .actions { display: none !important; }
+      .note { background: #fff; }
+    }
+
+    /* ============================================================
+       PORTAIL D'AVERTISSEMENT — bloque l'accès au formulaire tant
+       que la personne n'a pas cliqué sur "J'ai compris et j'accepte".
+       Rien n'est envoyé nulle part : ce n'est qu'un rappel visuel,
+       pas une vraie protection technique.
+       ============================================================ */
+    #portail {
+      position: fixed; inset: 0; background: #12211f; color: #f2ede1;
+      display: flex; align-items: flex-start; justify-content: center; z-index: 1000;
+      padding: 1.5rem; font-family: var(--font);
+      overflow-y: auto;
+    }
+    #portail .boite {
+      max-width: 620px; width: 100%; background: #1a322d; border: 1px solid #d99a3d;
+      border-radius: 14px; padding: 2rem; line-height: 1.6; margin: 1.5rem auto;
+    }
+    #portail h2 { margin-top: 0; color: #f0b23e; text-align: center; }
+    #portail .point { margin-bottom: 1rem; }
+    #portail .fleche { color: #8fe3d0; }
+    #portail button {
+      display: block; margin: 1.5rem auto 0; background: #e2402f; color: #fff;
+      font-weight: bold; font-size: 15px; padding: 0.8rem 1.6rem; border-radius: 8px;
+    }
+    @media (max-width: 600px) {
+      #portail { padding: 1rem; }
+      #portail .boite { padding: 1.3rem; margin: 0.8rem auto; }
+      #portail h2 { font-size: 1.15rem; }
+      #portail .point { font-size: 0.92rem; margin-bottom: 0.8rem; }
+      #portail button { font-size: 14px; padding: 0.7rem 1.3rem; }
+    }
+    .page { display: none; }
+  </style>
+</head>
+<body>
+
+  <div id="portail">
+    <div class="boite">
+      <h2>⚠️ ATTENTION – INFORMATIONS IMPORTANTES ⚠️</h2>
+      <div class="point">
+        <strong>1️⃣ Ce formulaire NE PEUT ÊTRE REMPLI QUE SUR INVITATION.</strong><br>
+        <span class="fleche">➡️</span> Il est donc inutile de le compléter à l'avance pour l'apporter au club.<br>
+        <span class="fleche">➡️</span> Vous devez obligatoirement contacter le président avant toute saisie.
+      </div>
+      <div class="point">
+        <strong>2️⃣ Ce formulaire est ÉPHÉMÈRE :</strong><br>
+        <span class="fleche">➡️</span> Aucune donnée ne peut et ne sera sauvegardée sur ce site.<br>
+        <span class="fleche">➡️</span> Dès que vous fermez la page, le formulaire est définitivement effacé.
+      </div>
+      <div class="point">
+        ✅ Une fois rempli, imprimez-le via le bouton prévu en bas de page, signez-le et remettez-le avec les autres documents demandés pour finaliser votre inscription.
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:0.8rem; margin-top:1.5rem;">
+        <button onclick="document.getElementById('portail').style.display='none'; document.getElementById('formulaire-page').style.display='block';" style="margin:0;">
+          Je comprends et j'accepte
+        </button>
+        <button onclick="window.location.href='horaires-tarifs.html#de-passage';" style="background:none; border:1px solid #d99a3d; color:#d99a3d; margin:0;">
+          ← Retour au site
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="formulaire-page">
+    <div class="header-logos">
+      <img src="ImageSite/logo_renseingement.png" alt="Logo VSF Tir Cible">
+      <h1>FICHE INDIVIDUELLE DE RENSEIGNEMENTS</h1>
+      <img src="ImageSite/ferte.png" alt="Logo La Ferté-Bernard">
+    </div>
+
+    <div class="grid">
+      <div class="field" style="grid-column: span 6;">
+        <label>N° du CLUB</label>
+        <div class="manual-line">0572078</div>
+      </div>
+      <div class="field" style="grid-column: span 6;">
+        <label>Numéro de Licence <span class="remarque">(à remplir par la direction)</span></label>
+        <div class="licence-boxes">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="field" style="grid-column: span 5;">
+        <label>NOM</label>
+        <input type="text" style="text-transform: uppercase;" />
+      </div>
+      <div class="field" style="grid-column: span 5;">
+        <label>PRÉNOM</label>
+        <input type="text" />
+      </div>
+      <div class="field" style="grid-column: span 2;">
+        <label>Sexe</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="sexe" /> M</label>
+          <label class="choice"><input type="radio" name="sexe" /> F</label>
+        </div>
+      </div>
+
+      <div class="field" style="grid-column: span 4;">
+        <label>Date de Naissance</label>
+        <input type="date" />
+      </div>
+      <div class="field" style="grid-column: span 4;">
+        <label>Lieu de Naissance</label>
+        <input type="text" />
+      </div>
+      <div class="field" style="grid-column: span 4;">
+        <label>Département de naissance</label>
+        <input type="text" />
+      </div>
+
+      <div class="field" style="grid-column: span 6;">
+        <label>Pays de Naissance</label>
+        <input type="text" />
+      </div>
+      <div class="field" style="grid-column: span 6;">
+        <label>Nationalité</label>
+        <input type="text" />
+      </div>
+
+      <div class="field" style="grid-column: span 6;">
+        <label>Handisport</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="handi" /> Oui</label>
+          <label class="choice"><input type="radio" name="handi" /> Non</label>
+        </div>
+      </div>
+
+      <div class="field" style="grid-column: span 6;">
+        <label>Profession</label>
+        <input type="text" />
+      </div>
+
+      <div class="field" style="grid-column: span 12;">
+        <label>Adresse</label>
+        <textarea></textarea>
+      </div>
+
+      <div class="field" style="grid-column: span 3;">
+        <label>Code Postal</label>
+        <input type="text" maxlength="5" pattern="\d{5}" inputmode="numeric"
+          oninput="this.value = this.value.replace(/\D/g,'').slice(0,5)" />
+      </div>
+      <div class="field" style="grid-column: span 6;">
+        <label>Ville</label>
+        <input type="text" />
+      </div>
+      <div class="field" style="grid-column: span 3;">
+        <label>Pays</label>
+        <input type="text" />
+      </div>
+
+      <div class="field" style="grid-column: span 4;">
+        <label>Tél Privé</label>
+        <input type="tel" />
+      </div>
+      <div class="field" style="grid-column: span 4;">
+        <label>Tél Mobile</label>
+        <input type="tel" />
+      </div>
+      <div class="field" style="grid-column: span 4;">
+        <label>Tél Professionnel</label>
+        <input type="tel" />
+      </div>
+
+      <div class="field" style="grid-column: span 12;">
+        <label>Courriel</label>
+        <input type="email" />
+      </div>
+
+      <div class="field" style="grid-column: span 8;">
+        <label>Personnes à prévenir en cas d'accident</label>
+        <input type="text" placeholder="Nom de la personne à prévenir" />
+      </div>
+      <div class="field" style="grid-column: span 4;">
+        <label>Téléphone</label>
+        <input type="tel" />
+      </div>
+    </div>
+
+    <h3 style="margin:12px 0 6px; font-size:15px;">Pièces et informations fournies</h3>
+    <div class="grid">
+      <div class="field" style="grid-column: span 6;">
+        <label>Certificat médical au club ?</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="certif" /> Oui</label>
+          <label class="choice"><input type="radio" name="certif" /> Non</label>
+        </div>
+      </div>
+      <div class="field" style="grid-column: span 6;">
+        <label>Pièce d'Identité ?</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="id" /> Oui</label>
+          <label class="choice"><input type="radio" name="id" /> Non</label>
+        </div>
+      </div>
+
+      <div class="field" style="grid-column: span 6;">
+        <label>Autorisation Parentale ?</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="autoparent" /> Oui</label>
+          <label class="choice"><input type="radio" name="autoparent" /> Non</label>
+        </div>
+      </div>
+      <div class="field" style="grid-column: span 6;">
+        <label>Règlement intérieur du club remis ?</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="reglement" /> Oui</label>
+          <label class="choice"><input type="radio" name="reglement" /> Non</label>
+        </div>
+      </div>
+
+      <div class="field" style="grid-column: span 6;">
+        <label>Extrait de Casier Judiciaire Bulletin N° 3 ?</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="casier" /> Oui</label>
+          <label class="choice"><input type="radio" name="casier" /> Non</label>
+        </div>
+      </div>
+
+      <div class="field" style="grid-column: span 6;">
+        <label>Droit à l'image ?</label>
+        <div class="row">
+          <label class="choice"><input type="radio" name="image" /> Oui</label>
+          <label class="choice"><input type="radio" name="image" /> Non</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Informatique et Liberté :</strong> La loi Informatique et Libertés garantit un droit d'accès
+      aux données me concernant. Celles-ci ne pourront être utilisées que pour des besoins internes
+      de la gestion de la Fédération Française de Tir (FFT) et ne pourront en aucun cas être
+      communiquées à des tiers sans mon accord.
+    </div>
+
+    <div style="margin-top:10px; font-size:14px;">
+      Renseignements ci-dessus certifiés exacts.
+    </div>
+
+    <div class="footer" style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start;">
+      <div>
+        <div class="manual-line">Fait à : ............................................</div>
+        <div class="manual-line" style="margin-top:6px;">Date : ....../....../..........</div>
+      </div>
+      <div>
+        <div class="manual-line">Signature :</div>
+        <div style="border:1px solid #000; height:70px; margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" onclick="window.print()">🖨️ Imprimer</button>
+    </div>
+  </div>
+</body>
+</html>

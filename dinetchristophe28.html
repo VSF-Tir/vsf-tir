@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planning — Administration VSF Tir Cible</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .conteneur-admin { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .msg-ok { color: var(--menthe); font-size: 0.9rem; margin: 0.8rem 0; min-height: 1.2em; }
+
+  .btn-principal {
+    padding: 0.7rem 1.4rem; border-radius: 10px; border: none; background: var(--menthe);
+    color: #0c2622; font-family: var(--police-titre); font-weight: 600; cursor: pointer; margin-bottom: 1rem;
+  }
+
+  /* ===== Panneau "Gérer l'agenda" (ajouter un jour) ===== */
+  .panneau-agenda {
+    display: none; background: var(--fond-carte); border-radius: var(--rayon);
+    padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+  }
+  .panneau-agenda .ligne-champs { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .panneau-agenda label { display: block; font-family: var(--police-donnee); font-size: 0.75rem; color: var(--menthe); text-transform: uppercase; margin-bottom: 0.3rem; }
+  .panneau-agenda input {
+    padding: 0.6rem 0.7rem; border-radius: 8px; border: 1px solid rgba(143,227,208,0.25);
+    background: var(--fond); color: var(--texte); font-family: var(--police-texte); font-size: 0.95rem;
+  }
+  .btn-secondaire {
+    padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid var(--or); background: none;
+    color: var(--or); font-family: var(--police-titre); font-weight: 600; cursor: pointer;
+  }
+
+  /* ===== Calendrier ===== */
+  .entete-calendrier { display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1rem; }
+  .entete-calendrier h2 { color: var(--menthe); margin: 0; }
+  .nav-mois button {
+    background: none; border: 1px solid var(--or); color: var(--or); border-radius: 8px;
+    padding: 0.4rem 0.8rem; cursor: pointer; font-family: var(--police-donnee); margin-left: 0.5rem;
+  }
+  .grille-calendrier { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .entete-jour-semaine {
+    text-align: center; font-family: var(--police-donnee); font-size: 0.7rem; color: var(--texte-att);
+    text-transform: uppercase; padding-bottom: 4px;
+  }
+  .case-jour {
+    aspect-ratio: 1; background: var(--fond-carte); border-radius: 10px; padding: 0.5rem;
+    cursor: default; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .case-jour.vide { background: transparent; }
+  .case-jour.avec-creneaux { cursor: pointer; border: 1px solid var(--menthe); background: rgba(80,200,150,0.10); }
+  .case-jour.avec-creneaux:hover { background: rgba(80,200,150,0.18); }
+  .case-jour.avec-creneaux.complet-jour { border-color: var(--rouge); background: rgba(226,64,47,0.10); }
+  .case-jour.avec-creneaux.complet-jour:hover { background: rgba(226,64,47,0.18); }
+  .case-jour.jour-vide-cliquable { cursor: pointer; border: 1px dashed rgba(217,154,61,0.3); }
+  .case-jour.jour-vide-cliquable:hover { border-color: var(--or); background: rgba(217,154,61,0.08); }
+  .badge-vide { background: none; color: rgba(217,154,61,0.5); font-size: 0.85rem; }
+  .case-jour.jour-selectionne { border: 2px solid var(--or); }
+  .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
+  .case-jour .badge {
+    font-family: var(--police-donnee); font-size: 0.68rem; color: var(--or-clair);
+    background: rgba(240,178,62,0.12); border-radius: 6px; padding: 2px 5px; align-self: flex-start;
+  }
+
+  /* ===== Panneau du jour sélectionné ===== */
+  .panneau-jour { display: none; margin-top: 2rem; background: var(--fond-carte); border-radius: var(--rayon); padding: 1.5rem; }
+  .entete-panneau-jour { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+  .entete-panneau-jour h3 { color: var(--menthe); margin: 0; text-transform: capitalize; }
+  .btn-supprimer-jour {
+    padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--rouge); background: none;
+    color: #ff8a75; font-family: var(--police-titre); font-weight: 600; cursor: pointer; font-size: 0.85rem;
+  }
+  .creneau-jour { background: var(--fond); border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 0.8rem; }
+  .creneau-jour .titre-creneau { display: flex; justify-content: space-between; align-items: center; font-family: var(--police-titre); color: #fff; }
+  .creneau-jour .places-info { font-family: var(--police-donnee); font-size: 0.8rem; color: var(--or-clair); }
+  .liste-noms { margin-top: 0.6rem; display: grid; gap: 0.4rem; }
+  .nom-reservation { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+  .btn-annuler-mini {
+    border: 1px solid var(--rouge); background: none; color: #ff8a75; border-radius: 6px;
+    padding: 0.2rem 0.6rem; font-size: 0.75rem; cursor: pointer;
+  }
+  .btn-attribuer-mini {
+    border: none; background: var(--or); color: #0c2622; border-radius: 6px;
+    padding: 0.3rem 0.8rem; font-size: 0.8rem; cursor: pointer; font-family: var(--police-titre); font-weight: 600; margin-top: 0.6rem;
+  }
+  .recherche-inline { display: none; margin-top: 0.6rem; }
+  .recherche-inline input {
+    width: 100%; padding: 0.5rem 0.7rem; border-radius: 8px; border: 1px solid rgba(143,227,208,0.25);
+    background: var(--fond-carte); color: var(--texte); font-size: 0.9rem; margin-bottom: 0.4rem;
+  }
+  .resultat-personne-mini {
+    padding: 0.4rem 0.7rem; border-radius: 6px; background: var(--fond-carte); cursor: pointer;
+    font-size: 0.85rem; margin-bottom: 0.3rem;
+  }
+  .resultat-personne-mini:hover { border: 1px solid var(--or); }
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div class="nav-conteneur">
+    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+  </div>
+</header>
+
+<div class="conteneur-admin">
+  <h2 style="color:var(--menthe);">Administration — Planning</h2>
+
+  <button class="btn-principal" onclick="basculerPanneauAgenda()">Gérer l'agenda (ajouter un jour)</button>
+
+  <div class="panneau-agenda" id="panneau-agenda">
+    <h3 style="color:var(--menthe);margin-top:0;">Ajouter un jour d'ouverture</h3>
+    <div class="ligne-champs">
+      <div>
+        <label for="nouv-date">Date</label>
+        <input type="date" id="nouv-date" oninput="appliquerHorairesParDefaut()">
+      </div>
+      <div>
+        <label for="nouv-debut">Ouverture</label>
+        <input type="time" id="nouv-debut" value="14:00">
+      </div>
+      <div>
+        <label for="nouv-fin">Fermeture</label>
+        <input type="time" id="nouv-fin" value="18:00">
+      </div>
+      <div>
+        <label for="nouv-places">Places par créneau d'1h</label>
+        <input type="number" id="nouv-places" value="4" min="1" style="width:80px;">
+      </div>
+    </div>
+    <button class="btn-secondaire" onclick="ajouterJour()">Créer les créneaux de ce jour</button>
+    <div class="msg-ok" id="msg-agenda"></div>
+  </div>
+
+  <div class="entete-calendrier">
+    <h2 id="titre-mois"></h2>
+    <div class="nav-mois">
+      <button onclick="changerMois(-1)">← Mois précédent</button>
+      <button onclick="changerMois(1)">Mois suivant →</button>
+    </div>
+  </div>
+
+  <div class="grille-calendrier" id="grille-calendrier"></div>
+
+  <div class="panneau-jour" id="panneau-jour"></div>
+</div>
+
+<script>
+  const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const NOMS_MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const NOMS_JOURS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+
+  let moisAffiche = new Date();
+  moisAffiche.setDate(1);
+  let joursAvecCreneaux = {}; // { "2026-07-29": { total_places: 8, total_prises: 3 } }
+  let jourSelectionne = null;
+  let tousLesComptes = [];
+
+  function formaterISO(date) {
+    // Attention : ne JAMAIS utiliser toISOString() ici, ça convertit en UTC
+    // et décale la date d'un jour selon le fuseau horaire (bug corrigé le 28/07).
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const j = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${j}`;
+  }
+
+  function formaterDateLongue(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  // ============================================================
+  // Gestion de l'agenda : ajouter un jour découpé en créneaux d'1h
+  // ============================================================
+  function basculerPanneauAgenda() {
+    const p = document.getElementById('panneau-agenda');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+  }
+
+  async function ajouterJour() {
+    const date = document.getElementById('nouv-date').value;
+    const debut = document.getElementById('nouv-debut').value;
+    const fin = document.getElementById('nouv-fin').value;
+    const places = parseInt(document.getElementById('nouv-places').value) || 4;
+    const msg = document.getElementById('msg-agenda');
+    msg.textContent = "";
+
+    if (!date || !debut || !fin) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "Merci de remplir la date et les horaires.";
+      return;
+    }
+
+    const heureDebutNum = parseInt(debut.split(':')[0]);
+    const heureFinNum = parseInt(fin.split(':')[0]);
+    if (heureFinNum <= heureDebutNum) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "L'heure de fermeture doit être après l'heure d'ouverture.";
+      return;
+    }
+
+    const { data: existants } = await sb.from('creneaux').select('heure_debut').eq('date', date);
+    const dejaLa = new Set((existants || []).map(e => e.heure_debut));
+
+    const nouveauxCreneaux = [];
+    for (let h = heureDebutNum; h < heureFinNum; h++) {
+      const hd = String(h).padStart(2, '0') + ":00";
+      const hf = String(h + 1).padStart(2, '0') + ":00";
+      if (!dejaLa.has(hd)) {
+        nouveauxCreneaux.push({ date, heure_debut: hd, heure_fin: hf, places_max: places, places_prises: 0 });
+      }
+    }
+
+    if (nouveauxCreneaux.length === 0) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "Ces créneaux existent déjà pour ce jour.";
+      return;
+    }
+
+    const { error } = await sb.from('creneaux').insert(nouveauxCreneaux);
+    if (error) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "Erreur lors de la création des créneaux.";
+      return;
+    }
+
+    msg.style.color = "var(--menthe)";
+    msg.textContent = nouveauxCreneaux.length + " créneau(x) créé(s) pour le " + formaterDateLongue(date) + ".";
+    chargerMois();
+  }
+
+  // ============================================================
+  // Calendrier mensuel
+  // ============================================================
+  function changerMois(delta) {
+    moisAffiche.setMonth(moisAffiche.getMonth() + delta);
+    jourSelectionne = null;
+    document.getElementById('panneau-jour').style.display = 'none';
+    chargerMois();
+  }
+
+  async function chargerMois() {
+    const annee = moisAffiche.getFullYear();
+    const mois = moisAffiche.getMonth();
+    document.getElementById('titre-mois').textContent = NOMS_MOIS[mois] + " " + annee;
+
+    const premierJour = new Date(annee, mois, 1);
+    const dernierJour = new Date(annee, mois + 1, 0);
+
+    const { data: creneaux } = await sb
+      .from('creneaux')
+      .select('*')
+      .gte('date', formaterISO(premierJour))
+      .lte('date', formaterISO(dernierJour));
+
+    joursAvecCreneaux = {};
+    (creneaux || []).forEach(c => {
+      if (!joursAvecCreneaux[c.date]) joursAvecCreneaux[c.date] = { places: 0, prises: 0 };
+      joursAvecCreneaux[c.date].places += c.places_max;
+      joursAvecCreneaux[c.date].prises += c.places_prises;
+    });
+
+    dessinerCalendrier(annee, mois, premierJour, dernierJour);
+  }
+
+  function dessinerCalendrier(annee, mois, premierJour, dernierJour) {
+    const grille = document.getElementById('grille-calendrier');
+    grille.innerHTML = "";
+
+    NOMS_JOURS.forEach(j => {
+      const e = document.createElement('div');
+      e.className = 'entete-jour-semaine';
+      e.textContent = j;
+      grille.appendChild(e);
+    });
+
+    // décalage : Date.getDay() = 0 pour dimanche -> on veut lundi en premier
+    let decalage = premierJour.getDay() - 1;
+    if (decalage < 0) decalage = 6;
+
+    for (let i = 0; i < decalage; i++) {
+      const vide = document.createElement('div');
+      vide.className = 'case-jour vide';
+      grille.appendChild(vide);
+    }
+
+    for (let jour = 1; jour <= dernierJour.getDate(); jour++) {
+      const dateStr = annee + "-" + String(mois + 1).padStart(2, '0') + "-" + String(jour).padStart(2, '0');
+      const info = joursAvecCreneaux[dateStr];
+      const case_ = document.createElement('div');
+      case_.className = 'case-jour' + (info ? (info.places - info.prises > 0 ? ' avec-creneaux' : ' avec-creneaux complet-jour') : ' jour-vide-cliquable') + (dateStr === jourSelectionne ? ' jour-selectionne' : '');
+      case_.innerHTML = `<div class="numero">${jour}</div>` +
+        (info ? `<div class="badge">${info.prises}/${info.places}</div>` : `<div class="badge badge-vide">+</div>`);
+      case_.onclick = () => info ? afficherJour(dateStr) : preparerAjoutJour(dateStr);
+      grille.appendChild(case_);
+    }
+  }
+
+  // Horaires habituels du club selon le jour : à ajuster ici si un jour ils changent.
+  const HORAIRES_PAR_DEFAUT = {
+    3: { debut: "14:00", fin: "16:00" }, // mercredi
+    0: { debut: "09:00", fin: "11:00" }, // dimanche
+  };
+
+  function appliquerHorairesParDefaut() {
+    const dateStr = document.getElementById('nouv-date').value;
+    if (!dateStr) return;
+    const jourSemaine = new Date(dateStr + "T00:00:00").getDay();
+    const defaut = HORAIRES_PAR_DEFAUT[jourSemaine];
+    if (defaut) {
+      document.getElementById('nouv-debut').value = defaut.debut;
+      document.getElementById('nouv-fin').value = defaut.fin;
+    }
+  }
+
+  // Clic sur un jour sans créneau : ouvre le panneau d'ajout avec la date déjà remplie
+  function preparerAjoutJour(dateStr) {
+    document.getElementById('panneau-agenda').style.display = 'block';
+    document.getElementById('nouv-date').value = dateStr;
+    appliquerHorairesParDefaut();
+    document.getElementById('panneau-jour').style.display = 'none';
+    jourSelectionne = null;
+    document.getElementById('nouv-debut').focus();
+    document.getElementById('panneau-agenda').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ============================================================
+  // Panneau du jour sélectionné
+  // ============================================================
+  async function afficherJour(dateStr) {
+    jourSelectionne = dateStr;
+    chargerMois(); // pour rafraîchir la sélection visuelle
+
+    const panneau = document.getElementById('panneau-jour');
+    panneau.style.display = 'block';
+    panneau.innerHTML = "Chargement...";
+
+    const { data: creneaux } = await sb.from('creneaux').select('*').eq('date', dateStr).order('heure_debut', { ascending: true });
+    const idsCreneaux = (creneaux || []).map(c => c.id);
+    const { data: reservations } = idsCreneaux.length > 0
+      ? await sb.from('reservations').select('*').in('creneau_id', idsCreneaux)
+      : { data: [] };
+
+    let html = `
+      <div class="entete-panneau-jour">
+        <h3>${formaterDateLongue(dateStr)}</h3>
+        <button class="btn-supprimer-jour" onclick="supprimerJour('${dateStr}')">Supprimer ce jour</button>
+      </div>
+    `;
+
+    (creneaux || []).forEach(c => {
+      const resasDuCreneau = (reservations || []).filter(r => r.creneau_id === c.id);
+      const restantes = c.places_max - c.places_prises;
+      html += `
+        <div class="creneau-jour">
+          <div class="titre-creneau">
+            <span>${c.heure_debut} – ${c.heure_fin}</span>
+            <span class="places-info">${restantes > 0 ? restantes + " place(s) libre(s)" : "Complet"} (${c.places_prises}/${c.places_max})</span>
+          </div>
+          <div class="liste-noms">
+            ${resasDuCreneau.map(r => `
+              <div class="nom-reservation">
+                <span>${r.prenom} ${r.nom}</span>
+                <button class="btn-annuler-mini" onclick="annulerReservationAdmin(${r.id}, ${c.id}, ${c.places_prises})">Annuler</button>
+              </div>
+            `).join('')}
+          </div>
+          ${restantes > 0 ? `
+            <button class="btn-attribuer-mini" onclick="basculerRecherche(${c.id})">+ Attribuer ce créneau</button>
+            <div class="recherche-inline" id="recherche-${c.id}">
+              <input type="text" placeholder="Tape un nom ou prénom..." oninput="filtrerPersonnesInline(${c.id}, this.value)">
+              <div id="resultats-${c.id}"></div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+
+    if ((creneaux || []).length === 0) {
+      html += "<p>Aucun créneau ce jour.</p>";
+    }
+
+    panneau.innerHTML = html;
+  }
+
+  async function supprimerJour(dateStr) {
+    if (!confirm("Supprimer tous les créneaux et réservations du " + formaterDateLongue(dateStr) + " ?")) return;
+
+    const { data: creneaux } = await sb.from('creneaux').select('id').eq('date', dateStr);
+    const ids = (creneaux || []).map(c => c.id);
+    if (ids.length > 0) {
+      await sb.from('reservations').delete().in('creneau_id', ids);
+      await sb.from('creneaux').delete().eq('date', dateStr);
+    }
+
+    jourSelectionne = null;
+    document.getElementById('panneau-jour').style.display = 'none';
+    chargerMois();
+  }
+
+  async function annulerReservationAdmin(reservationId, creneauId, placesPrisesActuelles) {
+    await sb.from('reservations').delete().eq('id', reservationId);
+    const nouvellesPlaces = Math.max(0, placesPrisesActuelles - 1);
+    await sb.from('creneaux').update({ places_prises: nouvellesPlaces }).eq('id', creneauId);
+    afficherJour(jourSelectionne);
+  }
+
+  // ============================================================
+  // Attribution manuelle (recherche inline sous chaque créneau)
+  // ============================================================
+  async function basculerRecherche(creneauId) {
+    if (tousLesComptes.length === 0) {
+      const { data } = await sb.from('comptes').select('*');
+      tousLesComptes = data || [];
+    }
+    const bloc = document.getElementById('recherche-' + creneauId);
+    bloc.style.display = bloc.style.display === 'block' ? 'none' : 'block';
+  }
+
+  function filtrerPersonnesInline(creneauId, recherche) {
+    const conteneur = document.getElementById('resultats-' + creneauId);
+    conteneur.innerHTML = "";
+    recherche = recherche.trim().toLowerCase();
+    if (recherche.length < 2) return;
+
+    const resultats = tousLesComptes.filter(c =>
+      (c.nom + " " + c.prenom + " " + c.identifiant).toLowerCase().includes(recherche)
+    );
+
+    resultats.slice(0, 8).forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'resultat-personne-mini';
+      div.textContent = c.prenom + " " + c.nom + " (" + c.mot_de_passe + ")";
+      div.onclick = () => attribuerCreneauInline(creneauId, c);
+      conteneur.appendChild(div);
+    });
+  }
+
+  async function attribuerCreneauInline(creneauId, compte) {
+    const { data: c } = await sb.from('creneaux').select('*').eq('id', creneauId).maybeSingle();
+    if (!c) return;
+
+    await sb.from('reservations').insert({
+      identifiant: compte.identifiant,
+      creneau_id: creneauId,
+      nom: compte.nom,
+      prenom: compte.prenom
+    });
+    await sb.from('creneaux').update({ places_prises: c.places_prises + 1 }).eq('id', creneauId);
+
+    afficherJour(jourSelectionne);
+  }
+
+  document.addEventListener('DOMContentLoaded', chargerMois);
+</script>
+</body>
+</html>

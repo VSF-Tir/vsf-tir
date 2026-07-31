@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VSF Tir Cible — Stand de tir La Ferté-Bernard</title>
+<meta name="description" content="Club de tir sportif à La Ferté-Bernard : 5 stands de 10 à 100 mètres, ouvert aux licenciés et aux tireurs de passage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<!-- Fond "pluie de munitions" en mosaïque mis de côté (voir ImageSite/balles.png).
+     On utilise ici une version en bande fine à la place : ImageSite/menu_balle.png -->
+<style>
+  .bande-balle { width: 100%; overflow: hidden; line-height: 0; background: var(--fond); }
+  .bande-balle img { width: 100%; height: auto; display: block; }
+  .logo-img { height: 92px; width: auto; display: block; }
+  @media (max-width: 780px) { .logo-img { height: 64px; } }
+  .logo { display: flex; align-items: center; gap: 0.8rem; }
+
+  .hero-contenu { position: relative; z-index: 2; }
+  .bloc-video { width: 100%; overflow: hidden; line-height: 0; background: var(--fond); }
+  .video-accueil { width: 100%; height: auto; display: block; max-height: 70vh; object-fit: cover; }
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div class="nav-conteneur">
+    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+    <button class="menu-toggle" aria-label="Ouvrir le menu">☰ Menu</button>
+    <ul class="nav-liens">
+      <li><a href="index.html" aria-current="page">Accueil</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="horaires-tarifs.html">Horaires &amp; Tarifs</a></li>
+      <li><a href="photos.html">Photos</a></li>
+      <li><a href="equipe.html">Équipe</a></li>
+      <li><a href="produits.html">Produits</a></li>
+      <li><a href="reservation.html">Réservation</a></li>
+    </ul>
+  </div>
+</header>
+
+<div class="bande-balle">
+  <img src="ImageSite/menu_balle.png" alt="" aria-hidden="true">
+</div>
+
+
+
+<section class="hero">
+  <div class="hero-contenu">
+    <p class="eyebrow">Champ Blanc · 72400 La Ferté-Bernard</p>
+    <h1>Visez juste,<br><em>amusez-vous bien.</em></h1>
+    <p class="intro">VSF Tir Cible vous accueille sur ses 5 stands, de 10 à 100 mètres, que vous soyez licencié, débutant curieux, ou tireur de passage dans la région.</p>
+    <div class="hero-actions">
+      <a href="horaires-tarifs.html" class="bouton bouton-plein">Horaires &amp; tarifs</a>
+      <a href="contact.html" class="bouton bouton-vide">Nous contacter</a>
+    </div>
+  </div>
+</section>
+
+<div class="bloc-video">
+  <video class="video-accueil" autoplay muted loop playsinline>
+    <source src="ImageSite/videos/vsf-tir-cible.mp4" type="video/mp4">
+  </video>
+</div>
+
+<section class="section">
+  <div class="section-tete">
+    <p class="eyebrow">Le club</p>
+    <h2>Découvrir le tir, ou pratiquer le vôtre</h2>
+  </div>
+  <p>Vous n'avez jamais tiré au pistolet ou à la carabine et vous voulez découvrir cette discipline&nbsp;? Notre club sportif est fait pour vous. De passage dans la région avec votre arme&nbsp;? Rejoignez-nous avec vos documents officiels (<a href="horaires-tarifs.html">voir les tarifs</a>).</p>
+  <div class="cartes">
+    <div class="carte"><h3>Horaires d'accueil</h3><p>Mercredi — 14h à 18h<br>Dimanche — 9h à 12h</p></div>
+    <div class="carte"><h3>Public accueilli</h3><p>Licenciés, débutants, tireurs de passage munis de leurs documents officiels.</p></div>
+    <div class="carte"><h3>Adresse</h3><p>Champ Blanc<br>72400 La Ferté-Bernard</p></div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="section-tete">
+    <p class="eyebrow">Nos installations</p>
+    <h2>5 stands, 4 distances</h2>
+  </div>
+  <div class="stands">
+    <div class="stand"><div class="chiffre">10 m</div><p>Initiation, précision courte distance</p></div>
+    <div class="stand"><div class="chiffre">25 m</div><p>Pistolet, discipline sportive classique</p></div>
+    <div class="stand"><div class="chiffre">50 m</div><p>Carabine, longue distance</p></div>
+    <div class="stand"><div class="chiffre">100 m</div><p>2 stands, grande distance carabine</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-tete">
+    <p class="eyebrow">En images</p>
+    <h2>La vie du club</h2>
+  </div>
+  <p>Retrouvez l'ensemble de nos photos — stands, entraînements et compétitions — sur la page <a href="photos.html">Photos</a>.</p>
+  <a href="photos.html" class="bouton bouton-vide">Voir la galerie</a>
+</section>
+
+<footer class="pied">
+  <div class="pied-conteneur">
+    <div class="pied-marque"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible"><div><strong>VSF Tir Cible</strong><br>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+    <div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+    <div>💬 <a href="contact.html">Nous contacter</a><br>🧭 <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" target="_blank" rel="noopener">Itinéraire</a></div>
+    <div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

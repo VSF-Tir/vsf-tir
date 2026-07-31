@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Réservation — VSF Tir Cible</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .conteneur-resa { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .carte-login {
+    background: var(--fond-carte); border-radius: var(--rayon); padding: 2rem;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25); max-width: 420px; margin: 2rem auto;
+  }
+  .carte-login h2 { color: var(--menthe); font-size: 1.3rem; text-align: center; }
+  .champ-login { margin-bottom: 1.1rem; }
+  .champ-login label { display: block; font-family: var(--police-donnee); font-size: 0.78rem; color: var(--menthe); text-transform: uppercase; margin-bottom: 0.3rem; }
+  .champ-login input {
+    width: 100%; padding: 0.7rem 0.8rem; border-radius: 10px; border: 1px solid rgba(143,227,208,0.25);
+    background: var(--fond); color: var(--texte); font-family: var(--police-texte); font-size: 1rem;
+  }
+  .msg-erreur { color: #ff8a75; font-size: 0.9rem; text-align: center; margin-top: 0.8rem; min-height: 1.2em; }
+  .msg-ok { color: var(--menthe); font-size: 0.9rem; text-align: center; margin: 0.8rem 0; min-height: 1.2em; }
+  .bouton-connexion {
+    width: 100%; margin-top: 0.5rem; padding: 0.85rem; border-radius: 12px; border: none;
+    background: var(--rouge); color: #fff; font-family: var(--police-titre); font-weight: 600; font-size: 1rem; cursor: pointer;
+  }
+  .accueil-connecte { display: none; }
+  .bienvenue { text-align: center; margin-bottom: 2rem; }
+  .bienvenue span { color: var(--or); }
+
+  .creneau {
+    background: var(--fond-carte); border-radius: var(--rayon); padding: 1rem 1.4rem;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+    border-left: 4px solid var(--or); margin-bottom: 0.6rem;
+  }
+  .btn-annuler { padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid var(--rouge); background: none; color: #ff8a75; font-family: var(--police-titre); font-weight: 600; cursor: pointer; }
+  .btn-deco { background: none; border: 1px solid var(--or); color: var(--or); border-radius: 8px; padding: 0.4rem 0.9rem; cursor: pointer; font-family: var(--police-donnee); font-size: 0.8rem; }
+
+  /* ===== Calendrier ===== */
+  .entete-calendrier { display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1rem; }
+  .entete-calendrier h2 { color: var(--menthe); margin: 0; }
+  .nav-mois button {
+    background: none; border: 1px solid var(--or); color: var(--or); border-radius: 8px;
+    padding: 0.4rem 0.8rem; cursor: pointer; font-family: var(--police-donnee); margin-left: 0.5rem; font-size: 0.85rem;
+  }
+  .grille-calendrier { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .entete-jour-semaine {
+    text-align: center; font-family: var(--police-donnee); font-size: 0.7rem; color: var(--texte-att);
+    text-transform: uppercase; padding-bottom: 4px;
+  }
+  .case-jour {
+    aspect-ratio: 1; background: var(--fond-carte); border-radius: 10px; padding: 0.5rem;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .case-jour.vide { background: transparent; }
+  .case-jour.disponible { cursor: pointer; border: 1px solid var(--menthe); background: rgba(80,200,150,0.10); }
+  .case-jour.disponible:hover { background: rgba(80,200,150,0.18); }
+  .case-jour.complet-jour { border: 1px solid var(--rouge); background: rgba(226,64,47,0.10); opacity: 0.75; }
+  .case-jour.jour-selectionne { border: 2px solid var(--or); }
+  .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
+  .case-jour .badge {
+    font-family: var(--police-donnee); font-size: 0.68rem; color: var(--menthe);
+    background: rgba(143,227,208,0.12); border-radius: 6px; padding: 2px 5px; align-self: flex-start;
+  }
+  .case-jour.complet-jour .badge { color: #ff8a75; background: rgba(226,64,47,0.12); }
+
+  .panneau-jour { display: none; margin-top: 2rem; background: var(--fond-carte); border-radius: var(--rayon); padding: 1.5rem; }
+  .panneau-jour h3 { color: var(--menthe); margin-top: 0; text-transform: capitalize; }
+  .creneau-jour { background: var(--fond); border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; }
+  .creneau-jour .heure { font-family: var(--police-titre); color: #fff; }
+  .creneau-jour .places { font-family: var(--police-donnee); font-size: 0.8rem; color: var(--or-clair); }
+  .btn-reserver {
+    padding: 0.5rem 1.1rem; border-radius: 10px; border: none; background: var(--menthe);
+    color: #0c2622; font-family: var(--police-titre); font-weight: 600; cursor: pointer;
+  }
+  .btn-reserver:disabled { background: rgba(143,227,208,0.2); color: var(--texte-att); cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div class="nav-conteneur">
+    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+    <button class="menu-toggle" aria-label="Ouvrir le menu">☰ Menu</button>
+    <ul class="nav-liens">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="horaires-tarifs.html">Horaires &amp; Tarifs</a></li>
+      <li><a href="photos.html">Photos</a></li>
+      <li><a href="equipe.html">Équipe</a></li>
+      <li><a href="produits.html">Produits</a></li>
+      <li><a href="reservation.html" aria-current="page">Réservation</a></li>
+    </ul>
+  </div>
+</header>
+
+<div class="conteneur-resa">
+
+  <div id="bloc-login" class="carte-login">
+    <h2>Se connecter</h2>
+    <div class="champ-login">
+      <label for="identifiant">Identifiant</label>
+      <input type="text" id="identifiant" autocomplete="username">
+    </div>
+    <div class="champ-login">
+      <label for="motdepasse">Numéro de licence</label>
+      <input type="text" inputmode="numeric" id="motdepasse" autocomplete="off">
+    </div>
+    <button class="bouton-connexion" onclick="connecter()">Se connecter</button>
+    <div class="msg-erreur" id="msg-login"></div>
+  </div>
+
+  <div id="bloc-connecte" class="accueil-connecte">
+    <div class="bienvenue">
+      <p>Bonjour <span id="nom-utilisateur"></span> —
+        <button class="btn-deco" onclick="deconnecter()">Se déconnecter</button>
+      </p>
+    </div>
+
+    <h2 style="color:var(--menthe);">Mes réservations</h2>
+    <div id="liste-mes-resa"></div>
+
+    <div class="entete-calendrier">
+      <h2>Choisir un créneau</h2>
+      <div class="nav-mois">
+        <button onclick="changerMois(-1)">← Précédent</button>
+        <button onclick="changerMois(1)">Suivant →</button>
+      </div>
+    </div>
+    <p id="titre-mois" style="color:var(--texte-att);margin-top:-0.5rem;"></p>
+
+    <div class="grille-calendrier" id="grille-calendrier"></div>
+
+    <div class="panneau-jour" id="panneau-jour"></div>
+    <div class="msg-ok" id="msg-resa"></div>
+  </div>
+
+</div>
+
+<footer class="pied">
+  <div class="pied-conteneur">
+    <div class="pied-marque"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible"><div><strong>VSF Tir Cible</strong><br>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+    <div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+    <div>💬 <a href="contact.html">Nous contacter</a><br>🧭 <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" target="_blank" rel="noopener">Itinéraire</a></div>
+    <div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const NOMS_MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const NOMS_JOURS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+
+  let utilisateur = null;
+  let moisAffiche = new Date();
+  moisAffiche.setDate(1);
+  let joursAvecCreneaux = {};
+  let jourSelectionne = null;
+
+  function formaterISO(date) {
+    // Même correctif que côté admin : pas de toISOString() (UTC), on reste en local.
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const j = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${j}`;
+  }
+
+  function formaterDateLongue(dateStr) {
+    const d = new Date(dateStr + "T00:00:00");
+    return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  async function connecter() {
+    const id = document.getElementById('identifiant').value.trim().toLowerCase();
+    const mdp = document.getElementById('motdepasse').value.trim();
+    const msg = document.getElementById('msg-login');
+    msg.textContent = "";
+
+    if (!id || !mdp) {
+      msg.textContent = "Merci de remplir les deux champs.";
+      return;
+    }
+
+    const { data, error } = await sb.from('comptes').select('*').eq('identifiant', id).eq('mot_de_passe', mdp).maybeSingle();
+    if (error || !data) {
+      msg.textContent = "Identifiant ou numéro de licence incorrect.";
+      return;
+    }
+
+    utilisateur = data;
+    document.getElementById('bloc-login').style.display = 'none';
+    document.getElementById('bloc-connecte').style.display = 'block';
+    document.getElementById('nom-utilisateur').textContent = data.prenom + " " + data.nom;
+
+    chargerMesReservations();
+    chargerMois();
+  }
+
+  function deconnecter() {
+    utilisateur = null;
+    document.getElementById('bloc-login').style.display = 'block';
+    document.getElementById('bloc-connecte').style.display = 'none';
+    document.getElementById('identifiant').value = "";
+    document.getElementById('motdepasse').value = "";
+  }
+
+  // ============================================================
+  // Calendrier
+  // ============================================================
+  function changerMois(delta) {
+    moisAffiche.setMonth(moisAffiche.getMonth() + delta);
+    jourSelectionne = null;
+    document.getElementById('panneau-jour').style.display = 'none';
+    chargerMois();
+  }
+
+  async function chargerMois() {
+    const annee = moisAffiche.getFullYear();
+    const mois = moisAffiche.getMonth();
+    document.getElementById('titre-mois').textContent = NOMS_MOIS[mois] + " " + annee;
+
+    const premierJour = new Date(annee, mois, 1);
+    const dernierJour = new Date(annee, mois + 1, 0);
+    const aujourdhui = formaterISO(new Date());
+
+    const { data: creneaux } = await sb
+      .from('creneaux')
+      .select('*')
+      .gte('date', formaterISO(premierJour) > aujourdhui ? formaterISO(premierJour) : aujourdhui)
+      .lte('date', formaterISO(dernierJour));
+
+    joursAvecCreneaux = {};
+    (creneaux || []).forEach(c => {
+      if (!joursAvecCreneaux[c.date]) joursAvecCreneaux[c.date] = { places: 0, prises: 0 };
+      joursAvecCreneaux[c.date].places += c.places_max;
+      joursAvecCreneaux[c.date].prises += c.places_prises;
+    });
+
+    dessinerCalendrier(annee, mois, premierJour, dernierJour);
+  }
+
+  function dessinerCalendrier(annee, mois, premierJour, dernierJour) {
+    const grille = document.getElementById('grille-calendrier');
+    grille.innerHTML = "";
+
+    NOMS_JOURS.forEach(j => {
+      const e = document.createElement('div');
+      e.className = 'entete-jour-semaine';
+      e.textContent = j;
+      grille.appendChild(e);
+    });
+
+    let decalage = premierJour.getDay() - 1;
+    if (decalage < 0) decalage = 6;
+    for (let i = 0; i < decalage; i++) {
+      const vide = document.createElement('div');
+      vide.className = 'case-jour vide';
+      grille.appendChild(vide);
+    }
+
+    for (let jour = 1; jour <= dernierJour.getDate(); jour++) {
+      const dateStr = annee + "-" + String(mois + 1).padStart(2, '0') + "-" + String(jour).padStart(2, '0');
+      const info = joursAvecCreneaux[dateStr];
+      const case_ = document.createElement('div');
+      let classe = 'case-jour';
+      if (info) {
+        const restantes = info.places - info.prises;
+        classe += restantes > 0 ? ' disponible' : ' complet-jour';
+      } else {
+        classe += ' vide-sans-creneau';
+      }
+      if (dateStr === jourSelectionne) classe += ' jour-selectionne';
+      case_.className = classe;
+      case_.innerHTML = `<div class="numero">${jour}</div>` +
+        (info ? `<div class="badge">${info.places - info.prises > 0 ? (info.places - info.prises) + " libre(s)" : "Complet"}</div>` : '');
+      if (info) case_.onclick = () => afficherJour(dateStr);
+      grille.appendChild(case_);
+    }
+  }
+
+  async function afficherJour(dateStr) {
+    jourSelectionne = dateStr;
+    chargerMois();
+
+    const panneau = document.getElementById('panneau-jour');
+    panneau.style.display = 'block';
+    panneau.innerHTML = "Chargement...";
+
+    const { data: creneaux } = await sb.from('creneaux').select('*').eq('date', dateStr).order('heure_debut', { ascending: true });
+
+    let html = `<h3>${formaterDateLongue(dateStr)}</h3>`;
+    (creneaux || []).forEach(c => {
+      const restantes = c.places_max - c.places_prises;
+      const complet = restantes <= 0;
+      html += `
+        <div class="creneau-jour">
+          <span class="heure">${c.heure_debut} – ${c.heure_fin}</span>
+          <span class="places">${complet ? "Complet" : restantes + " place(s)"}</span>
+          <button class="btn-reserver" ${complet ? "disabled" : ""} onclick="reserver(${c.id}, ${c.places_prises})">
+            ${complet ? "Complet" : "Réserver"}
+          </button>
+        </div>
+      `;
+    });
+    if ((creneaux || []).length === 0) html += "<p>Aucun créneau ce jour.</p>";
+
+    panneau.innerHTML = html;
+    panneau.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ============================================================
+  // Mes réservations
+  // ============================================================
+  async function chargerMesReservations() {
+    const conteneur = document.getElementById('liste-mes-resa');
+    conteneur.innerHTML = "Chargement...";
+
+    const { data: mesResa, error } = await sb.from('reservations').select('*').eq('identifiant', utilisateur.identifiant);
+    if (error) { conteneur.innerHTML = "Erreur de chargement."; return; }
+    if (mesResa.length === 0) { conteneur.innerHTML = "<p>Aucune réservation en cours.</p>"; return; }
+
+    const { data: creneaux } = await sb.from('creneaux').select('*');
+
+    conteneur.innerHTML = "";
+    mesResa.forEach(r => {
+      const c = (creneaux || []).find(cr => cr.id === r.creneau_id);
+      const div = document.createElement('div');
+      div.className = 'creneau';
+      div.innerHTML = `
+        <span>${c ? formaterDateLongue(c.date) + " — " + c.heure_debut + " – " + c.heure_fin : "Créneau supprimé"}</span>
+        <button class="btn-annuler" onclick="annulerReservation(${r.id}, ${c ? c.id : 'null'}, ${c ? c.places_prises : 0})">Annuler</button>
+      `;
+      conteneur.appendChild(div);
+    });
+  }
+
+  async function reserver(creneauId, placesPrisesActuelles) {
+    const msg = document.getElementById('msg-resa');
+    msg.textContent = "";
+
+    const { error: erreurInsert } = await sb.from('reservations').insert({
+      identifiant: utilisateur.identifiant,
+      creneau_id: creneauId,
+      nom: utilisateur.nom,
+      prenom: utilisateur.prenom
+    });
+
+    if (erreurInsert) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "Erreur lors de la réservation, réessaie.";
+      return;
+    }
+
+    await sb.from('creneaux').update({ places_prises: placesPrisesActuelles + 1 }).eq('id', creneauId);
+
+    msg.style.color = "var(--menthe)";
+    msg.textContent = "Réservation confirmée !";
+
+    chargerMois();
+    afficherJour(jourSelectionne);
+    chargerMesReservations();
+  }
+
+  async function annulerReservation(reservationId, creneauId, placesPrisesActuelles) {
+    const msg = document.getElementById('msg-resa');
+    msg.textContent = "";
+
+    const { error } = await sb.from('reservations').delete().eq('id', reservationId);
+    if (error) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "Erreur lors de l'annulation.";
+      return;
+    }
+
+    if (creneauId) {
+      const nouvellesPlaces = Math.max(0, placesPrisesActuelles - 1);
+      await sb.from('creneaux').update({ places_prises: nouvellesPlaces }).eq('id', creneauId);
+    }
+
+    msg.style.color = "var(--menthe)";
+    msg.textContent = "Réservation annulée.";
+
+    chargerMois();
+    if (jourSelectionne) afficherJour(jourSelectionne);
+    chargerMesReservations();
+  }
+</script>
+</body>
+</html>

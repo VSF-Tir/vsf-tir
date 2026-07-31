@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>UHPPOTE — Schémas techniques</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .conteneur-uhp { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .schema-bloc { margin-bottom: 3rem; }
+  .schema-bloc h2 { color: var(--menthe); }
+  .schema-bloc img {
+    width: 100%; height: auto; border-radius: var(--rayon);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.3); background: var(--fond-carte);
+    cursor: zoom-in;
+  }
+  .schema-bloc .aide-zoom { font-size: 0.78rem; color: var(--texte-att); margin-top: 0.5rem; }
+
+  #visionneuse {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(8,15,14,0.96); overflow: hidden; touch-action: none;
+  }
+  #visionneuse.ouverte { display: block; }
+  #visionneuse img {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    max-width: none; user-select: none; -webkit-user-drag: none;
+    cursor: grab;
+  }
+  #visionneuse img.saisi { cursor: grabbing; }
+  #visionneuse .barre-outils {
+    position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 0.6rem; background: rgba(0,0,0,0.6); padding: 0.6rem;
+    border-radius: 999px; z-index: 1001;
+  }
+  #visionneuse .barre-outils button {
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--or);
+    background: var(--fond-carte); color: var(--or-clair); font-size: 1.2rem; cursor: pointer;
+  }
+  #visionneuse .fermer {
+    position: fixed; top: 1.2rem; right: 1.5rem; z-index: 1001;
+    background: none; border: 1px solid var(--or); color: var(--or);
+    font-size: 1.3rem; width: 42px; height: 42px; border-radius: 50%; cursor: pointer;
+  }
+  #visionneuse .astuce {
+    position: fixed; top: 1.2rem; left: 1.5rem; z-index: 1001;
+    color: var(--texte-att); font-size: 0.8rem; background: rgba(0,0,0,0.5);
+    padding: 0.5rem 0.9rem; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+
+<header class="entete">
+  <div class="nav-conteneur">
+    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+  </div>
+</header>
+
+<div class="conteneur-uhp">
+  <h1 style="color:var(--menthe);">Contrôleur de portes UHPPOTE — Schémas techniques</h1>
+  <p style="color:var(--texte-att);">Page technique à usage interne (câblage, dépannage). Non référencée, non liée au menu du site.</p>
+
+  <div class="schema-bloc">
+    <h2>Schéma descriptif</h2>
+    <img src="ImageSite/schema_descriptif.png" alt="Schéma descriptif du contrôleur UHPPOTE" onclick="ouvrirVisionneuse(this.src)">
+    <p class="aide-zoom">Clique sur le schéma pour l'agrandir en plein écran et zoomer.</p>
+  </div>
+
+  <div class="schema-bloc">
+    <h2>Schéma de câblage</h2>
+    <img src="ImageSite/schema_de_cablage.png" alt="Schéma de câblage du contrôleur UHPPOTE" onclick="ouvrirVisionneuse(this.src)">
+    <p class="aide-zoom">Clique sur le schéma pour l'agrandir en plein écran et zoomer.</p>
+  </div>
+</div>
+
+<div id="visionneuse">
+  <div class="astuce">Molette ou pincer pour zoomer · glisser pour déplacer · double-clic pour réinitialiser</div>
+  <button class="fermer" onclick="fermerVisionneuse()">✕</button>
+  <img id="image-visionneuse" src="" alt="" ondblclick="reinitialiserZoom()">
+  <div class="barre-outils">
+    <button onclick="zoomer(-0.5)">−</button>
+    <button onclick="reinitialiserZoom()">⟳</button>
+    <button onclick="zoomer(0.5)">+</button>
+  </div>
+</div>
+
+<script>
+  let echelle = 1, posX = 0, posY = 0;
+  let enTrainDeGlisser = false, glisserDepartX = 0, glisserDepartY = 0;
+  let distancePinchDepart = 0, echellePinchDepart = 1;
+  const image = () => document.getElementById('image-visionneuse');
+
+  function ouvrirVisionneuse(src) {
+    image().src = src;
+    reinitialiserZoom();
+    document.getElementById('visionneuse').classList.add('ouverte');
+  }
+  function fermerVisionneuse() {
+    document.getElementById('visionneuse').classList.remove('ouverte');
+  }
+  function reinitialiserZoom() {
+    echelle = 1; posX = 0; posY = 0;
+    appliquerTransformation();
+  }
+  function appliquerTransformation() {
+    image().style.transform = `translate(-50%, -50%) translate(${posX}px, ${posY}px) scale(${echelle})`;
+  }
+  function zoomer(delta) {
+    echelle = Math.min(8, Math.max(1, echelle + delta));
+    appliquerTransformation();
+  }
+
+  document.getElementById('visionneuse').addEventListener('wheel', function(e) {
+    e.preventDefault();
+    zoomer(e.deltaY < 0 ? 0.3 : -0.3);
+  }, { passive: false });
+
+  image().addEventListener('mousedown', function(e) {
+    enTrainDeGlisser = true;
+    image().classList.add('saisi');
+    glisserDepartX = e.clientX - posX;
+    glisserDepartY = e.clientY - posY;
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!enTrainDeGlisser) return;
+    posX = e.clientX - glisserDepartX;
+    posY = e.clientY - glisserDepartY;
+    appliquerTransformation();
+  });
+  window.addEventListener('mouseup', function() {
+    enTrainDeGlisser = false;
+    image().classList.remove('saisi');
+  });
+
+  function distanceEntre(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+  }
+  document.getElementById('visionneuse').addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1) {
+      enTrainDeGlisser = true;
+      glisserDepartX = e.touches[0].clientX - posX;
+      glisserDepartY = e.touches[0].clientY - posY;
+    } else if (e.touches.length === 2) {
+      enTrainDeGlisser = false;
+      distancePinchDepart = distanceEntre(e.touches[0], e.touches[1]);
+      echellePinchDepart = echelle;
+    }
+  }, { passive: false });
+
+  document.getElementById('visionneuse').addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (e.touches.length === 1 && enTrainDeGlisser) {
+      posX = e.touches[0].clientX - glisserDepartX;
+      posY = e.touches[0].clientY - glisserDepartY;
+      appliquerTransformation();
+    } else if (e.touches.length === 2) {
+      const distanceActuelle = distanceEntre(e.touches[0], e.touches[1]);
+      echelle = Math.min(8, Math.max(1, echellePinchDepart * (distanceActuelle / distancePinchDepart)));
+      appliquerTransformation();
+    }
+  }, { passive: false });
+
+  document.getElementById('visionneuse').addEventListener('touchend', function(e) {
+    if (e.touches.length === 0) enTrainDeGlisser = false;
+  });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerVisionneuse(); });
+</script>
+</body>
+</html>
