@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="robots" content="noindex, nofollow">
-  <title>FICHE INDIVIDUELLE DE RENSEIGNEMENTS</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
+<meta charset="utf-8"/>
+<meta content="noindex, nofollow" name="robots"/>
+<title>FICHE INDIVIDUELLE DE RENSEIGNEMENTS</title>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<style>
     :root {
       --gap: 8px;
       --border: 1px solid #000;
@@ -111,227 +112,205 @@
   </style>
 </head>
 <body>
-
-  <div id="portail">
-    <div class="boite">
-      <h2>⚠️ ATTENTION – INFORMATIONS IMPORTANTES ⚠️</h2>
-      <div class="point">
-        <strong>1️⃣ Ce formulaire NE PEUT ÊTRE REMPLI QUE SUR INVITATION.</strong><br>
-        <span class="fleche">➡️</span> Il est donc inutile de le compléter à l'avance pour l'apporter au club.<br>
-        <span class="fleche">➡️</span> Vous devez obligatoirement contacter le président avant toute saisie.
+<div id="portail">
+<div class="boite">
+<h2>⚠️ ATTENTION – INFORMATIONS IMPORTANTES ⚠️</h2>
+<div class="point">
+<strong>1️⃣ Ce formulaire NE PEUT ÊTRE REMPLI QUE SUR INVITATION.</strong><br/>
+<span class="fleche">➡️</span> Il est donc inutile de le compléter à l'avance pour l'apporter au club.<br/>
+<span class="fleche">➡️</span> Vous devez obligatoirement contacter le président avant toute saisie.
       </div>
-      <div class="point">
-        <strong>2️⃣ Ce formulaire est ÉPHÉMÈRE :</strong><br>
-        <span class="fleche">➡️</span> Aucune donnée ne peut et ne sera sauvegardée sur ce site.<br>
-        <span class="fleche">➡️</span> Dès que vous fermez la page, le formulaire est définitivement effacé.
+<div class="point">
+<strong>2️⃣ Ce formulaire est ÉPHÉMÈRE :</strong><br/>
+<span class="fleche">➡️</span> Aucune donnée ne peut et ne sera sauvegardée sur ce site.<br/>
+<span class="fleche">➡️</span> Dès que vous fermez la page, le formulaire est définitivement effacé.
       </div>
-      <div class="point">
+<div class="point">
         ✅ Une fois rempli, imprimez-le via le bouton prévu en bas de page, signez-le et remettez-le avec les autres documents demandés pour finaliser votre inscription.
       </div>
-      <div style="display:flex; flex-direction:column; align-items:center; gap:0.8rem; margin-top:1.5rem;">
-        <button onclick="document.getElementById('portail').style.display='none'; document.getElementById('formulaire-page').style.display='block';" style="margin:0;">
+<div style="display:flex; flex-direction:column; align-items:center; gap:0.8rem; margin-top:1.5rem;">
+<button onclick="document.getElementById('portail').style.display='none'; document.getElementById('formulaire-page').style.display='block';" style="margin:0;">
           Je comprends et j'accepte
         </button>
-        <button onclick="window.location.href='horaires-tarifs.html#de-passage';" style="background:none; border:1px solid #d99a3d; color:#d99a3d; margin:0;">
+<button onclick="window.location.href='horaires-tarifs.html#de-passage';" style="background:none; border:1px solid #d99a3d; color:#d99a3d; margin:0;">
           ← Retour au site
         </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="formulaire-page">
-    <div class="header-logos">
-      <img src="ImageSite/logo_renseingement.png" alt="Logo VSF Tir Cible">
-      <h1>FICHE INDIVIDUELLE DE RENSEIGNEMENTS</h1>
-      <img src="ImageSite/ferte.png" alt="Logo La Ferté-Bernard">
-    </div>
-
-    <div class="grid">
-      <div class="field" style="grid-column: span 6;">
-        <label>N° du CLUB</label>
-        <div class="manual-line">0572078</div>
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>Numéro de Licence <span class="remarque">(à remplir par la direction)</span></label>
-        <div class="licence-boxes">
-          <span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span>
-        </div>
-      </div>
-
-      <div class="field" style="grid-column: span 5;">
-        <label>NOM</label>
-        <input type="text" style="text-transform: uppercase;" />
-      </div>
-      <div class="field" style="grid-column: span 5;">
-        <label>PRÉNOM</label>
-        <input type="text" />
-      </div>
-      <div class="field" style="grid-column: span 2;">
-        <label>Sexe</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="sexe" /> M</label>
-          <label class="choice"><input type="radio" name="sexe" /> F</label>
-        </div>
-      </div>
-
-      <div class="field" style="grid-column: span 4;">
-        <label>Date de Naissance</label>
-        <input type="date" />
-      </div>
-      <div class="field" style="grid-column: span 4;">
-        <label>Lieu de Naissance</label>
-        <input type="text" />
-      </div>
-      <div class="field" style="grid-column: span 4;">
-        <label>Département de naissance</label>
-        <input type="text" />
-      </div>
-
-      <div class="field" style="grid-column: span 6;">
-        <label>Pays de Naissance</label>
-        <input type="text" />
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>Nationalité</label>
-        <input type="text" />
-      </div>
-
-      <div class="field" style="grid-column: span 6;">
-        <label>Handisport</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="handi" /> Oui</label>
-          <label class="choice"><input type="radio" name="handi" /> Non</label>
-        </div>
-      </div>
-
-      <div class="field" style="grid-column: span 6;">
-        <label>Profession</label>
-        <input type="text" />
-      </div>
-
-      <div class="field" style="grid-column: span 12;">
-        <label>Adresse</label>
-        <textarea></textarea>
-      </div>
-
-      <div class="field" style="grid-column: span 3;">
-        <label>Code Postal</label>
-        <input type="text" maxlength="5" pattern="\d{5}" inputmode="numeric"
-          oninput="this.value = this.value.replace(/\D/g,'').slice(0,5)" />
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>Ville</label>
-        <input type="text" />
-      </div>
-      <div class="field" style="grid-column: span 3;">
-        <label>Pays</label>
-        <input type="text" />
-      </div>
-
-      <div class="field" style="grid-column: span 4;">
-        <label>Tél Privé</label>
-        <input type="tel" />
-      </div>
-      <div class="field" style="grid-column: span 4;">
-        <label>Tél Mobile</label>
-        <input type="tel" />
-      </div>
-      <div class="field" style="grid-column: span 4;">
-        <label>Tél Professionnel</label>
-        <input type="tel" />
-      </div>
-
-      <div class="field" style="grid-column: span 12;">
-        <label>Courriel</label>
-        <input type="email" />
-      </div>
-
-      <div class="field" style="grid-column: span 8;">
-        <label>Personnes à prévenir en cas d'accident</label>
-        <input type="text" placeholder="Nom de la personne à prévenir" />
-      </div>
-      <div class="field" style="grid-column: span 4;">
-        <label>Téléphone</label>
-        <input type="tel" />
-      </div>
-    </div>
-
-    <h3 style="margin:12px 0 6px; font-size:15px;">Pièces et informations fournies</h3>
-    <div class="grid">
-      <div class="field" style="grid-column: span 6;">
-        <label>Certificat médical au club ?</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="certif" /> Oui</label>
-          <label class="choice"><input type="radio" name="certif" /> Non</label>
-        </div>
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>Pièce d'Identité ?</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="id" /> Oui</label>
-          <label class="choice"><input type="radio" name="id" /> Non</label>
-        </div>
-      </div>
-
-      <div class="field" style="grid-column: span 6;">
-        <label>Autorisation Parentale ?</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="autoparent" /> Oui</label>
-          <label class="choice"><input type="radio" name="autoparent" /> Non</label>
-        </div>
-      </div>
-      <div class="field" style="grid-column: span 6;">
-        <label>Règlement intérieur du club remis ?</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="reglement" /> Oui</label>
-          <label class="choice"><input type="radio" name="reglement" /> Non</label>
-        </div>
-      </div>
-
-      <div class="field" style="grid-column: span 6;">
-        <label>Extrait de Casier Judiciaire Bulletin N° 3 ?</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="casier" /> Oui</label>
-          <label class="choice"><input type="radio" name="casier" /> Non</label>
-        </div>
-      </div>
-
-      <div class="field" style="grid-column: span 6;">
-        <label>Droit à l'image ?</label>
-        <div class="row">
-          <label class="choice"><input type="radio" name="image" /> Oui</label>
-          <label class="choice"><input type="radio" name="image" /> Non</label>
-        </div>
-      </div>
-    </div>
-
-    <div class="note">
-      <strong>Informatique et Liberté :</strong> La loi Informatique et Libertés garantit un droit d'accès
+</div>
+</div>
+</div>
+<div class="page" id="formulaire-page">
+<div class="header-logos">
+<img alt="Logo VSF Tir Cible" src="ImageSite/logo_renseingement.png"/>
+<h1>FICHE INDIVIDUELLE DE RENSEIGNEMENTS</h1>
+<img alt="Logo La Ferté-Bernard" src="ImageSite/ferte.png"/>
+</div>
+<div class="grid">
+<div class="field" style="grid-column: span 6;">
+<label>N° du CLUB</label>
+<div class="manual-line">0572078</div>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Numéro de Licence <span class="remarque">(à remplir par la direction)</span></label>
+<div class="licence-boxes">
+<span></span><span></span><span></span><span></span>
+<span></span><span></span><span></span><span></span>
+</div>
+</div>
+<div class="field" style="grid-column: span 5;">
+<label>NOM</label>
+<input style="text-transform: uppercase;" type="text"/>
+</div>
+<div class="field" style="grid-column: span 5;">
+<label>PRÉNOM</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 2;">
+<label>Sexe</label>
+<div class="row">
+<label class="choice"><input name="sexe" type="radio"/> M</label>
+<label class="choice"><input name="sexe" type="radio"/> F</label>
+</div>
+</div>
+<div class="field" style="grid-column: span 4;">
+<label>Date de Naissance</label>
+<input type="date"/>
+</div>
+<div class="field" style="grid-column: span 4;">
+<label>Lieu de Naissance</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 4;">
+<label>Département de naissance</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Pays de Naissance</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Nationalité</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Handisport</label>
+<div class="row">
+<label class="choice"><input name="handi" type="radio"/> Oui</label>
+<label class="choice"><input name="handi" type="radio"/> Non</label>
+</div>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Profession</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 12;">
+<label>Adresse</label>
+<textarea></textarea>
+</div>
+<div class="field" style="grid-column: span 3;">
+<label>Code Postal</label>
+<input inputmode="numeric" maxlength="5" oninput="this.value = this.value.replace(/\D/g,'').slice(0,5)" pattern="\d{5}" type="text"/>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Ville</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 3;">
+<label>Pays</label>
+<input type="text"/>
+</div>
+<div class="field" style="grid-column: span 4;">
+<label>Tél Privé</label>
+<input type="tel"/>
+</div>
+<div class="field" style="grid-column: span 4;">
+<label>Tél Mobile</label>
+<input type="tel"/>
+</div>
+<div class="field" style="grid-column: span 4;">
+<label>Tél Professionnel</label>
+<input type="tel"/>
+</div>
+<div class="field" style="grid-column: span 12;">
+<label>Courriel</label>
+<input type="email"/>
+</div>
+<div class="field" style="grid-column: span 8;">
+<label>Personnes à prévenir en cas d'accident</label>
+<input placeholder="Nom de la personne à prévenir" type="text"/>
+</div>
+<div class="field" style="grid-column: span 4;">
+<label>Téléphone</label>
+<input type="tel"/>
+</div>
+</div>
+<h3 style="margin:12px 0 6px; font-size:15px;">Pièces et informations fournies</h3>
+<div class="grid">
+<div class="field" style="grid-column: span 6;">
+<label>Certificat médical au club ?</label>
+<div class="row">
+<label class="choice"><input name="certif" type="radio"/> Oui</label>
+<label class="choice"><input name="certif" type="radio"/> Non</label>
+</div>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Pièce d'Identité ?</label>
+<div class="row">
+<label class="choice"><input name="id" type="radio"/> Oui</label>
+<label class="choice"><input name="id" type="radio"/> Non</label>
+</div>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Autorisation Parentale ?</label>
+<div class="row">
+<label class="choice"><input name="autoparent" type="radio"/> Oui</label>
+<label class="choice"><input name="autoparent" type="radio"/> Non</label>
+</div>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Règlement intérieur du club remis ?</label>
+<div class="row">
+<label class="choice"><input name="reglement" type="radio"/> Oui</label>
+<label class="choice"><input name="reglement" type="radio"/> Non</label>
+</div>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Extrait de Casier Judiciaire Bulletin N° 3 ?</label>
+<div class="row">
+<label class="choice"><input name="casier" type="radio"/> Oui</label>
+<label class="choice"><input name="casier" type="radio"/> Non</label>
+</div>
+</div>
+<div class="field" style="grid-column: span 6;">
+<label>Droit à l'image ?</label>
+<div class="row">
+<label class="choice"><input name="image" type="radio"/> Oui</label>
+<label class="choice"><input name="image" type="radio"/> Non</label>
+</div>
+</div>
+</div>
+<div class="note">
+<strong>Informatique et Liberté :</strong> La loi Informatique et Libertés garantit un droit d'accès
       aux données me concernant. Celles-ci ne pourront être utilisées que pour des besoins internes
       de la gestion de la Fédération Française de Tir (FFT) et ne pourront en aucun cas être
       communiquées à des tiers sans mon accord.
     </div>
-
-    <div style="margin-top:10px; font-size:14px;">
+<div style="margin-top:10px; font-size:14px;">
       Renseignements ci-dessus certifiés exacts.
     </div>
-
-    <div class="footer" style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start;">
-      <div>
-        <div class="manual-line">Fait à : ............................................</div>
-        <div class="manual-line" style="margin-top:6px;">Date : ....../....../..........</div>
-      </div>
-      <div>
-        <div class="manual-line">Signature :</div>
-        <div style="border:1px solid #000; height:70px; margin-top:6px;"></div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button type="button" onclick="window.print()">🖨️ Imprimer</button>
-    </div>
-  </div>
-<script async src="//gc.zgo.at/count.js" data-goatcounter="https://vsf-tir.goatcounter.com/count"></script>
+<div class="footer" style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start;">
+<div>
+<div class="manual-line">Fait à : ............................................</div>
+<div class="manual-line" style="margin-top:6px;">Date : ....../....../..........</div>
+</div>
+<div>
+<div class="manual-line">Signature :</div>
+<div style="border:1px solid #000; height:70px; margin-top:6px;"></div>
+</div>
+</div>
+<div class="actions">
+<button onclick="window.print()" type="button">🖨️ Imprimer</button>
+</div>
+</div>
+<script async="" data-goatcounter="https://vsf-tir.goatcounter.com/count" src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
