@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Planning — Administration VSF Tir Cible</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/x-icon" href="ImageSite/vsf.ico">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .conteneur-admin { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
@@ -98,55 +99,47 @@
 </style>
 </head>
 <body>
-
 <header class="entete">
-  <div class="nav-conteneur">
-    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
-  </div>
-</header>
-
-<div class="conteneur-admin">
-  <h2 style="color:var(--menthe);">Administration — Planning</h2>
-
-  <button class="btn-principal" onclick="basculerPanneauAgenda()">Gérer l'agenda (ajouter un jour)</button>
-
-  <div class="panneau-agenda" id="panneau-agenda">
-    <h3 style="color:var(--menthe);margin-top:0;">Ajouter un jour d'ouverture</h3>
-    <div class="ligne-champs">
-      <div>
-        <label for="nouv-date">Date</label>
-        <input type="date" id="nouv-date" oninput="appliquerHorairesParDefaut()">
-      </div>
-      <div>
-        <label for="nouv-debut">Ouverture</label>
-        <input type="time" id="nouv-debut" value="14:00">
-      </div>
-      <div>
-        <label for="nouv-fin">Fermeture</label>
-        <input type="time" id="nouv-fin" value="18:00">
-      </div>
-      <div>
-        <label for="nouv-places">Places par créneau d'1h</label>
-        <input type="number" id="nouv-places" value="4" min="1" style="width:80px;">
-      </div>
-    </div>
-    <button class="btn-secondaire" onclick="ajouterJour()">Créer les créneaux de ce jour</button>
-    <div class="msg-ok" id="msg-agenda"></div>
-  </div>
-
-  <div class="entete-calendrier">
-    <h2 id="titre-mois"></h2>
-    <div class="nav-mois">
-      <button onclick="changerMois(-1)">← Mois précédent</button>
-      <button onclick="changerMois(1)">Mois suivant →</button>
-    </div>
-  </div>
-
-  <div class="grille-calendrier" id="grille-calendrier"></div>
-
-  <div class="panneau-jour" id="panneau-jour"></div>
+<div class="nav-conteneur">
+<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
 </div>
-
+</header>
+<div class="conteneur-admin">
+<h2 style="color:var(--menthe);">Administration — Planning</h2>
+<button class="btn-principal" onclick="basculerPanneauAgenda()">Gérer l'agenda (ajouter un jour)</button>
+<div class="panneau-agenda" id="panneau-agenda">
+<h3 style="color:var(--menthe);margin-top:0;">Ajouter un jour d'ouverture</h3>
+<div class="ligne-champs">
+<div>
+<label for="nouv-date">Date</label>
+<input id="nouv-date" oninput="appliquerHorairesParDefaut()" type="date"/>
+</div>
+<div>
+<label for="nouv-debut">Ouverture</label>
+<input id="nouv-debut" type="time" value="14:00"/>
+</div>
+<div>
+<label for="nouv-fin">Fermeture</label>
+<input id="nouv-fin" type="time" value="18:00"/>
+</div>
+<div>
+<label for="nouv-places">Places par créneau d'1h</label>
+<input id="nouv-places" min="1" style="width:80px;" type="number" value="4"/>
+</div>
+</div>
+<button class="btn-secondaire" onclick="ajouterJour()">Créer les créneaux de ce jour</button>
+<div class="msg-ok" id="msg-agenda"></div>
+</div>
+<div class="entete-calendrier">
+<h2 id="titre-mois"></h2>
+<div class="nav-mois">
+<button onclick="changerMois(-1)">← Mois précédent</button>
+<button onclick="changerMois(1)">Mois suivant →</button>
+</div>
+</div>
+<div class="grille-calendrier" id="grille-calendrier"></div>
+<div class="panneau-jour" id="panneau-jour"></div>
+</div>
 <script>
   const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
   const SUPABASE_KEY = "sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW";
@@ -459,6 +452,6 @@
 
   document.addEventListener('DOMContentLoaded', chargerMois);
 </script>
-<script async src="//gc.zgo.at/count.js" data-goatcounter="https://vsf-tir.goatcounter.com/count"></script>
+<script async="" data-goatcounter="https://vsf-tir.goatcounter.com/count" src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
