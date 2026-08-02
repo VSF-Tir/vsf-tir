@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Photos — VSF Tir Cible</title>
-<meta content="Galerie photo du club de tir VSF Tir Cible à La Ferté-Bernard." name="description"/>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
-<link href="style.css" rel="stylesheet"/>
+<meta name="description" content="Galerie photo du club de tir VSF Tir Cible à La Ferté-Bernard.">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/x-icon" href="ImageSite/vsf.ico">
 <style>
   .photo-couverture {
     display: block; margin: 1.5rem auto 0; max-width: 100%; max-height: 480px;
@@ -43,128 +43,143 @@
 </style>
 </head>
 <body>
+
 <header class="entete">
-<div class="nav-conteneur">
-<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
-<button aria-label="Ouvrir le menu" class="menu-toggle">☰ Menu</button>
-<ul class="nav-liens">
-<li><a href="index.html">Accueil</a></li>
-<li><a href="contact.html">Contact</a></li>
-<li><a href="horaires-tarifs.html">Horaires &amp; Tarifs</a></li>
-<li><a aria-current="page" href="photos.html">Photos</a></li>
-<li><a href="equipe.html">Équipe</a></li>
-<li><a href="produits.html">Produits</a></li>
-<li><a href="reservation.html">Réservation</a></li>
-</ul>
-</div>
+  <div class="nav-conteneur">
+    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+    <button class="menu-toggle" aria-label="Ouvrir le menu">☰ Menu</button>
+    <ul class="nav-liens">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="horaires-tarifs.html">Horaires &amp; Tarifs</a></li>
+      <li><a href="photos.html" aria-current="page">Photos</a></li>
+      <li><a href="equipe.html">Équipe</a></li>
+      <li><a href="produits.html">Produits</a></li>
+      <li><a href="reservation.html">Réservation</a></li>
+    </ul>
+  </div>
 </header>
+
+
+
 <section class="section">
-<div class="section-tete"><p class="eyebrow">Galerie</p><h2>La vie du club en images</h2></div>
-<img alt="Vue du stand de tir" class="photo-couverture" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/image1.jpeg"/>
-<div class="onglets-photos">
-<button class="onglet-photo actif" onclick="afficherOnglet('evenements', this)">Évènements</button>
-<button class="onglet-photo" onclick="afficherOnglet('armes-anciennes', this)">Initiation armes anciennes</button>
-<button class="onglet-photo" onclick="afficherOnglet('long-rifle', this)">50 Mètres 3 positions 22 Long Rifle</button>
-<button class="onglet-photo" onclick="afficherOnglet('longue-distance', this)">Formation tir longue distance</button>
-<button class="onglet-photo" onclick="afficherOnglet('stands', this)">Nos stands de tir</button>
-<button class="onglet-photo" onclick="afficherOnglet('divers', this)">Divers</button>
-</div>
-<div class="contenu-onglet actif" id="onglet-evenements">
-<div class="galerie">
-<figure><img alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/evenements/evenements1.jpg"/></figure>
-<figure><img alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/evenements/evenements2.jpg"/></figure>
-<figure><img alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/evenements/evenements3.jpg"/></figure>
-<figure><img alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/evenements/evenements4.jpg"/></figure>
-<figure><img alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/evenements/evenements5.jpg"/></figure>
-</div>
-</div>
-<div class="contenu-onglet" id="onglet-armes-anciennes">
-<div class="galerie">
-<figure><img alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/poudres/poudre1.jpg"/></figure>
-<figure><img alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/poudres/poudre2.jpg"/></figure>
-<figure><img alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/poudres/poudre3.jpg"/></figure>
-<figure><img alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/poudres/poudre4.jpg"/></figure>
-<figure><img alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/poudres/poudre5.jpg"/></figure>
-<figure><img alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/poudres/poudre6.jpg"/></figure>
-<figure><img alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/poudres/poudre7.jpg"/></figure>
-</div>
-</div>
-<div class="contenu-onglet" id="onglet-long-rifle">
-<div class="galerie">
-<figure><img alt="50 mètres 3 positions 22 Long Rifle" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/50metres_22lr/22lr1.jpg"/></figure>
-<figure><img alt="50 mètres 3 positions 22 Long Rifle" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/50metres_22lr/22lr2.jpg"/></figure>
-</div>
-</div>
-<div class="contenu-onglet" id="onglet-longue-distance">
-<div class="galerie">
-<figure><img alt="Formation tir longue distance" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/TLD/TLD1.jpg"/></figure>
-<figure><img alt="Formation tir longue distance" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/TLD/TLD2.jpg"/></figure>
-<figure><img alt="Formation tir longue distance" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/TLD/TLD3.jpg"/></figure>
-</div>
-</div>
-<div class="contenu-onglet" id="onglet-stands">
-<p class="sous-titre-stand">10 mètres</p>
-<div class="galerie">
-<figure><img alt="Stand 10 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/10m/10m1.jpg"/></figure>
-<figure><img alt="Stand 10 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/10m/10m2.jpg"/></figure>
-</div>
-<p class="sous-titre-stand">25 mètres</p>
-<div class="galerie">
-<figure><img alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/25m/25m1.jpeg"/></figure>
-<figure><img alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/25m/25m2.jpeg"/></figure>
-<figure><img alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/25m/25m3.jpeg"/></figure>
-<figure><img alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/25m/25m4.jpeg"/></figure>
-</div>
-<p class="sous-titre-stand">50 mètres</p>
-<div class="galerie">
-<figure><img alt="Stand 50 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/50m/50m1.jpg"/></figure>
-<figure><img alt="Stand 50 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/50m/50m2.jpg"/></figure>
-<figure><img alt="Stand 50 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/50m/50m3.jpg"/></figure>
-</div>
-<p class="sous-titre-stand">100 mètres</p>
-<div class="galerie">
-<figure><img alt="Stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100m/100m1.jpg"/></figure>
-<figure><img alt="Stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100m/100m2.jpg"/></figure>
-<figure><img alt="Stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100m/100m3.jpg"/></figure>
-<figure><img alt="Stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100m/100m4.jpg"/></figure>
-</div>
-<p class="sous-titre-stand">Nouveau 100 mètres</p>
-<div class="galerie">
-<figure><img alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel1.jpeg"/></figure>
-<figure><img alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel2.jpeg"/></figure>
-<figure><img alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel3.jpg"/></figure>
-<figure><img alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel4.jpg"/></figure>
-<figure><img alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel5.jpg"/></figure>
-</div>
-</div>
-<div class="contenu-onglet" id="onglet-divers">
-<div class="galerie">
-<figure><img alt="Divers" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/Divers/divers1.jpg"/></figure>
-<figure><img alt="Divers" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/Divers/divers2.jpg"/></figure>
-<figure><img alt="Divers" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/Divers/divers3.jpg"/></figure>
-<figure><img alt="Divers" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/Divers/divers4.jpg"/></figure>
-<figure><img alt="Divers" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/Divers/divers5.jpg"/></figure>
-<figure><img alt="Divers" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/Divers/divers6.jpg"/></figure>
-<figure><img alt="Divers" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/galerie/Divers/divers7.jpg"/></figure>
-</div>
-</div>
-<p class="mentions-legales">
+  <div class="section-tete"><p class="eyebrow">Galerie</p><h2>La vie du club en images</h2></div>
+
+  <img class="photo-couverture" src="ImageSite/galerie/image1.jpeg" alt="Vue du stand de tir" onclick="ouvrirVisionneuse(this.src)">
+
+  <div class="onglets-photos">
+    <button class="onglet-photo actif" onclick="afficherOnglet('evenements', this)">Évènements</button>
+    <button class="onglet-photo" onclick="afficherOnglet('armes-anciennes', this)">Initiation armes anciennes</button>
+    <button class="onglet-photo" onclick="afficherOnglet('long-rifle', this)">50 Mètres 3 positions 22 Long Rifle</button>
+    <button class="onglet-photo" onclick="afficherOnglet('longue-distance', this)">Formation tir longue distance</button>
+    <button class="onglet-photo" onclick="afficherOnglet('stands', this)">Nos stands de tir</button>
+    <button class="onglet-photo" onclick="afficherOnglet('divers', this)">Divers</button>
+  </div>
+
+  <div id="onglet-evenements" class="contenu-onglet actif">
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/evenements/evenements1.jpg" alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/evenements/evenements2.jpg" alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/evenements/evenements3.jpg" alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/evenements/evenements4.jpg" alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/evenements/evenements5.jpg" alt="Évènement du club" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+  </div>
+
+  <div id="onglet-armes-anciennes" class="contenu-onglet">
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/poudres/poudre1.jpg" alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/poudres/poudre2.jpg" alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/poudres/poudre3.jpg" alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/poudres/poudre4.jpg" alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/poudres/poudre5.jpg" alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/poudres/poudre6.jpg" alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/poudres/poudre7.jpg" alt="Initiation armes anciennes" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+  </div>
+
+  <div id="onglet-long-rifle" class="contenu-onglet">
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/50metres_22lr/22lr1.jpg" alt="50 mètres 3 positions 22 Long Rifle" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/50metres_22lr/22lr2.jpg" alt="50 mètres 3 positions 22 Long Rifle" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+  </div>
+
+  <div id="onglet-longue-distance" class="contenu-onglet">
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/TLD/TLD1.jpg" alt="Formation tir longue distance" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/TLD/TLD2.jpg" alt="Formation tir longue distance" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/TLD/TLD3.jpg" alt="Formation tir longue distance" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+  </div>
+
+  <div id="onglet-stands" class="contenu-onglet">
+    <p class="sous-titre-stand">10 mètres</p>
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/nos_stand/10m/10m1.jpg" alt="Stand 10 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/10m/10m2.jpg" alt="Stand 10 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+    <p class="sous-titre-stand">25 mètres</p>
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/nos_stand/25m/25m1.jpeg" alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/25m/25m2.jpeg" alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/25m/25m3.jpeg" alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/25m/25m4.jpeg" alt="Stand 25 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+    <p class="sous-titre-stand">50 mètres</p>
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/nos_stand/50m/50m1.jpg" alt="Stand 50 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/50m/50m2.jpg" alt="Stand 50 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/50m/50m3.jpg" alt="Stand 50 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+    <p class="sous-titre-stand">100 mètres</p>
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/nos_stand/100m/100m1.jpg" alt="Stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/100m/100m2.jpg" alt="Stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/100m/100m3.jpg" alt="Stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+    <p class="sous-titre-stand">Nouveau 100 mètres</p>
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel1.jpeg" alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel2.jpeg" alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel3.jpg" alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel4.jpg" alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/nos_stand/100mTunnel/100mTunnel5.jpg" alt="Nouveau stand 100 mètres" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+  </div>
+
+  <div id="onglet-divers" class="contenu-onglet">
+    <div class="galerie">
+      <figure><img src="ImageSite/galerie/Divers/divers1.jpg" alt="Divers" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/Divers/divers2.jpg" alt="Divers" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/Divers/divers3.jpg" alt="Divers" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/Divers/divers4.jpg" alt="Divers" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/Divers/divers5.jpg" alt="Divers" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/Divers/divers6.jpg" alt="Divers" onclick="ouvrirVisionneuse(this.src)"></figure>
+      <figure><img src="ImageSite/galerie/Divers/divers7.jpg" alt="Divers" onclick="ouvrirVisionneuse(this.src)"></figure>
+    </div>
+  </div>
+
+  <p class="mentions-legales">
     Toutes nos photos sont protégées. Toute utilisation frauduleuse de ces images vous expose à des poursuites pénales.
     Les personnes présentes sur ces photos ont donné leur accord pour l'utilisation de leur image.
   </p>
 </section>
+
 <footer class="pied">
-<div class="pied-conteneur">
-<div class="pied-marque"><img alt="VSF Tir Cible" src="ImageSite/logo_club.png"/><div><strong>VSF Tir Cible</strong><br/>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
-<div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br/>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
-<div>💬 <a href="contact.html">Nous contacter</a><br/>🧭 <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" rel="noopener" target="_blank">Itinéraire</a></div>
-<div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
-</div>
+  <div class="pied-conteneur">
+    <div class="pied-marque"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible"><div><strong>VSF Tir Cible</strong><br>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+    <div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+    <div>💬 <a href="contact.html">Nous contacter</a><br>🧭 <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" target="_blank" rel="noopener">Itinéraire</a></div>
+    <div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+  </div>
 </footer>
+
 <div id="visionneuse" onclick="fermerVisionneuse()">
-<button class="fermer" onclick="fermerVisionneuse()">✕</button>
-<img alt="" id="image-visionneuse" src=""/>
+  <button class="fermer" onclick="fermerVisionneuse()">✕</button>
+  <img id="image-visionneuse" src="" alt="">
 </div>
+
 <script src="script.js"></script>
 <script>
   function afficherOnglet(id, bouton) {
