@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Réservation — VSF Tir Cible</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/x-icon" href="ImageSite/vsf.ico">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   .conteneur-resa { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
@@ -80,75 +81,64 @@
 </style>
 </head>
 <body>
-
 <header class="entete">
-  <div class="nav-conteneur">
-    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
-    <button class="menu-toggle" aria-label="Ouvrir le menu">☰ Menu</button>
-    <ul class="nav-liens">
-      <li><a href="index.html">Accueil</a></li>
-      <li><a href="contact.html">Contact</a></li>
-      <li><a href="horaires-tarifs.html">Horaires &amp; Tarifs</a></li>
-      <li><a href="photos.html">Photos</a></li>
-      <li><a href="equipe.html">Équipe</a></li>
-      <li><a href="produits.html">Produits</a></li>
-      <li><a href="reservation.html" aria-current="page">Réservation</a></li>
-    </ul>
-  </div>
-</header>
-
-<div class="conteneur-resa">
-
-  <div id="bloc-login" class="carte-login">
-    <h2>Se connecter</h2>
-    <div class="champ-login">
-      <label for="identifiant">Identifiant</label>
-      <input type="text" id="identifiant" autocomplete="username">
-    </div>
-    <div class="champ-login">
-      <label for="motdepasse">Numéro de licence</label>
-      <input type="text" inputmode="numeric" id="motdepasse" autocomplete="off">
-    </div>
-    <button class="bouton-connexion" onclick="connecter()">Se connecter</button>
-    <div class="msg-erreur" id="msg-login"></div>
-  </div>
-
-  <div id="bloc-connecte" class="accueil-connecte">
-    <div class="bienvenue">
-      <p>Bonjour <span id="nom-utilisateur"></span> —
-        <button class="btn-deco" onclick="deconnecter()">Se déconnecter</button>
-      </p>
-    </div>
-
-    <h2 style="color:var(--menthe);">Mes réservations</h2>
-    <div id="liste-mes-resa"></div>
-
-    <div class="entete-calendrier">
-      <h2>Choisir un créneau</h2>
-      <div class="nav-mois">
-        <button onclick="changerMois(-1)">← Précédent</button>
-        <button onclick="changerMois(1)">Suivant →</button>
-      </div>
-    </div>
-    <p id="titre-mois" style="color:var(--texte-att);margin-top:-0.5rem;"></p>
-
-    <div class="grille-calendrier" id="grille-calendrier"></div>
-
-    <div class="panneau-jour" id="panneau-jour"></div>
-    <div class="msg-ok" id="msg-resa"></div>
-  </div>
-
+<div class="nav-conteneur">
+<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+<button aria-label="Ouvrir le menu" class="menu-toggle">☰ Menu</button>
+<ul class="nav-liens">
+<li><a href="index.html">Accueil</a></li>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="horaires-tarifs.html">Horaires &amp; Tarifs</a></li>
+<li><a href="photos.html">Photos</a></li>
+<li><a href="equipe.html">Équipe</a></li>
+<li><a href="produits.html">Produits</a></li>
+<li><a aria-current="page" href="reservation.html">Réservation</a></li>
+</ul>
 </div>
-
+</header>
+<div class="conteneur-resa">
+<div class="carte-login" id="bloc-login">
+<h2>Se connecter</h2>
+<div class="champ-login">
+<label for="identifiant">Identifiant</label>
+<input autocomplete="username" id="identifiant" type="text"/>
+</div>
+<div class="champ-login">
+<label for="motdepasse">Numéro de licence</label>
+<input autocomplete="off" id="motdepasse" inputmode="numeric" type="text"/>
+</div>
+<button class="bouton-connexion" onclick="connecter()">Se connecter</button>
+<div class="msg-erreur" id="msg-login"></div>
+</div>
+<div class="accueil-connecte" id="bloc-connecte">
+<div class="bienvenue">
+<p>Bonjour <span id="nom-utilisateur"></span> —
+        <button class="btn-deco" onclick="deconnecter()">Se déconnecter</button>
+</p>
+</div>
+<h2 style="color:var(--menthe);">Mes réservations</h2>
+<div id="liste-mes-resa"></div>
+<div class="entete-calendrier">
+<h2>Choisir un créneau</h2>
+<div class="nav-mois">
+<button onclick="changerMois(-1)">← Précédent</button>
+<button onclick="changerMois(1)">Suivant →</button>
+</div>
+</div>
+<p id="titre-mois" style="color:var(--texte-att);margin-top:-0.5rem;"></p>
+<div class="grille-calendrier" id="grille-calendrier"></div>
+<div class="panneau-jour" id="panneau-jour"></div>
+<div class="msg-ok" id="msg-resa"></div>
+</div>
+</div>
 <footer class="pied">
-  <div class="pied-conteneur">
-    <div class="pied-marque"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible"><div><strong>VSF Tir Cible</strong><br>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
-    <div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
-    <div>💬 <a href="contact.html">Nous contacter</a><br>🧭 <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" target="_blank" rel="noopener">Itinéraire</a></div>
-    <div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
-  </div>
+<div class="pied-conteneur">
+<div class="pied-marque"><img alt="VSF Tir Cible" src="ImageSite/logo_club.png"/><div><strong>VSF Tir Cible</strong><br/>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+<div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br/>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+<div>💬 <a href="contact.html">Nous contacter</a><br/>🧭 <a href="https://www.google.com/maps/dir//Stand+De+Tir,+72400+La+Fert%C3%A9-Bernard/@48.1941777,0.5770175,13z/data=!4m8!4m7!1m0!1m5!1m1!1s0x47e253b435f0c71d:0x797e1aee68b818d8!2m2!1d0.6120368!2d48.194183" rel="noopener" target="_blank">Itinéraire</a></div>
+<div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+</div>
 </footer>
-
 <script src="script.js"></script>
 <script>
   const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
@@ -392,6 +382,6 @@
     chargerMesReservations();
   }
 </script>
-<script async src="//gc.zgo.at/count.js" data-goatcounter="https://vsf-tir.goatcounter.com/count"></script>
+<script async="" data-goatcounter="https://vsf-tir.goatcounter.com/count" src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
