@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex, nofollow" name="robots"/>
 <title>UHPPOTE — Schémas techniques</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/x-icon" href="ImageSite/vsf.ico">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
 <style>
   .conteneur-uhp { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
   .schema-bloc { margin-bottom: 3rem; }
@@ -53,41 +54,35 @@
 </style>
 </head>
 <body>
-
 <header class="entete">
-  <div class="nav-conteneur">
-    <a href="index.html" class="logo"><img src="ImageSite/logo_club.png" alt="VSF Tir Cible" class="logo-img"><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
-  </div>
+<div class="nav-conteneur">
+<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+</div>
 </header>
-
 <div class="conteneur-uhp">
-  <h1 style="color:var(--menthe);">Contrôleur de portes UHPPOTE — Schémas techniques</h1>
-  <p style="color:var(--texte-att);">Page technique à usage interne (câblage, dépannage). Non référencée, non liée au menu du site.</p>
-
-  <div class="schema-bloc">
-    <h2>Schéma descriptif</h2>
-    <img src="ImageSite/schema_descriptif.png" alt="Schéma descriptif du contrôleur UHPPOTE" onclick="ouvrirVisionneuse(this.src)">
-    <p class="aide-zoom">Clique sur le schéma pour l'agrandir en plein écran et zoomer.</p>
-  </div>
-
-  <div class="schema-bloc">
-    <h2>Schéma de câblage</h2>
-    <img src="ImageSite/schema_de_cablage.png" alt="Schéma de câblage du contrôleur UHPPOTE" onclick="ouvrirVisionneuse(this.src)">
-    <p class="aide-zoom">Clique sur le schéma pour l'agrandir en plein écran et zoomer.</p>
-  </div>
+<h1 style="color:var(--menthe);">Contrôleur de portes UHPPOTE — Schémas techniques</h1>
+<p style="color:var(--texte-att);">Page technique à usage interne (câblage, dépannage). Non référencée, non liée au menu du site.</p>
+<div class="schema-bloc">
+<h2>Schéma descriptif</h2>
+<img alt="Schéma descriptif du contrôleur UHPPOTE" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/schema_descriptif.png"/>
+<p class="aide-zoom">Clique sur le schéma pour l'agrandir en plein écran et zoomer.</p>
 </div>
-
+<div class="schema-bloc">
+<h2>Schéma de câblage</h2>
+<img alt="Schéma de câblage du contrôleur UHPPOTE" onclick="ouvrirVisionneuse(this.src)" src="ImageSite/schema_de_cablage.png"/>
+<p class="aide-zoom">Clique sur le schéma pour l'agrandir en plein écran et zoomer.</p>
+</div>
+</div>
 <div id="visionneuse">
-  <div class="astuce">Molette ou pincer pour zoomer · glisser pour déplacer · double-clic pour réinitialiser</div>
-  <button class="fermer" onclick="fermerVisionneuse()">✕</button>
-  <img id="image-visionneuse" src="" alt="" ondblclick="reinitialiserZoom()">
-  <div class="barre-outils">
-    <button onclick="zoomer(-0.5)">−</button>
-    <button onclick="reinitialiserZoom()">⟳</button>
-    <button onclick="zoomer(0.5)">+</button>
-  </div>
+<div class="astuce">Molette ou pincer pour zoomer · glisser pour déplacer · double-clic pour réinitialiser</div>
+<button class="fermer" onclick="fermerVisionneuse()">✕</button>
+<img alt="" id="image-visionneuse" ondblclick="reinitialiserZoom()" src=""/>
+<div class="barre-outils">
+<button onclick="zoomer(-0.5)">−</button>
+<button onclick="reinitialiserZoom()">⟳</button>
+<button onclick="zoomer(0.5)">+</button>
 </div>
-
+</div>
 <script>
   let echelle = 1, posX = 0, posY = 0;
   let enTrainDeGlisser = false, glisserDepartX = 0, glisserDepartY = 0;
@@ -170,6 +165,6 @@
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerVisionneuse(); });
 </script>
-<script async src="//gc.zgo.at/count.js" data-goatcounter="https://vsf-tir.goatcounter.com/count"></script>
+<script async="" data-goatcounter="https://vsf-tir.goatcounter.com/count" src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
