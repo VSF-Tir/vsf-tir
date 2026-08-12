@@ -184,6 +184,13 @@
       return;
     }
 
+    const ADMIN_IDS = ["hinser", "dinchr"];
+    if (ADMIN_IDS.includes(data.identifiant)) {
+      sessionStorage.setItem('vsf_admin', JSON.stringify(data));
+      window.location.href = 'adminbarbaredestroy.html';
+      return;
+    }
+
     utilisateur = data;
     document.getElementById('bloc-login').style.display = 'none';
     document.getElementById('bloc-connecte').style.display = 'block';
