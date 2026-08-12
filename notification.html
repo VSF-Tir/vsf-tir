@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex, nofollow" name="robots"/>
+<title>Notifications — Administration VSF Tir Cible</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .conteneur-notif { max-width: 620px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .lien-retour { display: inline-block; margin-bottom: 1.5rem; color: var(--or-clair); font-family: var(--police-donnee); font-size: 0.85rem; text-decoration: none; }
+  .lien-retour:hover { color: var(--or); }
+
+  .carte-notif {
+    background: var(--fond-carte); border-radius: var(--rayon); padding: 2rem;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+  }
+  .carte-notif h2 { color: var(--menthe); margin-top: 0; }
+  .sous-titre { color: var(--texte-att); font-size: 0.9rem; margin-top: -0.6rem; margin-bottom: 1.5rem; }
+
+  .champ { margin-bottom: 1.2rem; }
+  .champ label { display: block; font-family: var(--police-donnee); font-size: 0.78rem; color: var(--menthe); text-transform: uppercase; margin-bottom: 0.4rem; }
+  .champ input[type="text"], .champ input[type="datetime-local"], .champ textarea {
+    width: 100%; padding: 0.7rem 0.8rem; border-radius: 10px; border: 1px solid rgba(143,227,208,0.25);
+    background: var(--fond); color: var(--texte); font-family: var(--police-texte); font-size: 1rem;
+  }
+  .champ textarea { resize: vertical; min-height: 90px; }
+  .champ input:focus, .champ textarea:focus { outline: 2px solid var(--or); }
+
+  .ligne-case { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.2rem; }
+  .ligne-case input { width: 18px; height: 18px; }
+  .ligne-case label { font-family: var(--police-texte); font-size: 0.95rem; color: var(--texte); }
+
+  #champ-date { display: none; }
+
+  .bouton-envoyer {
+    width: 100%; padding: 0.9rem; border-radius: 12px; border: none;
+    background: var(--rouge); color: #fff; font-family: var(--police-titre); font-weight: 600; font-size: 1rem; cursor: pointer;
+  }
+  .bouton-envoyer:hover { background: var(--or); color: #1e1e1e; }
+  .bouton-envoyer:disabled { background: #3a3a3a; color: #7a7a7a; cursor: not-allowed; }
+
+  .msg-statut { margin-top: 1rem; font-size: 0.9rem; text-align: center; min-height: 1.2em; }
+  .msg-statut.ok { color: var(--menthe); }
+  .msg-statut.avert { color: var(--or); }
+  .msg-statut.erreur { color: #ff8a75; }
+</style>
+</head>
+<body>
+<header class="entete">
+<div class="nav-conteneur">
+<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+</div>
+</header>
+<div class="conteneur-notif">
+<a class="lien-retour" href="adminbarbaredestroy.html">← Retour à l'administration</a>
+
+<div class="carte-notif">
+<h2>📣 Créer une notification</h2>
+<p class="sous-titre">Envoyée à tous les utilisateurs de l'application VSF Tir Cible.</p>
+
+<div class="champ">
+<label for="champ-titre">Titre de la notification</label>
+<input id="champ-titre" placeholder="Ex : Stand fermé" type="text"/>
+</div>
+
+<div class="champ">
+<label for="champ-message">Message</label>
+<textarea id="champ-message" placeholder="Ex : Le stand sera fermé de 10h à 11h"></textarea>
+</div>
+
+<div class="ligne-case">
+<input id="case-programmer" type="checkbox"/>
+<label for="case-programmer">Programmer l'envoi</label>
+</div>
+
+<div class="champ" id="champ-date">
+<label for="champ-date-heure">Date et heure d'envoi</label>
+<input id="champ-date-heure" type="datetime-local"/>
+</div>
+
+<button class="bouton-envoyer" id="bouton-envoyer" onclick="envoyerNotification()">Envoyer la notification</button>
+<div class="msg-statut" id="msg-statut"></div>
+</div>
+</div>
+<footer class="pied">
+<div class="pied-conteneur">
+<div class="pied-marque"><img alt="VSF Tir Cible" src="ImageSite/logo_club.png"/><div><strong>VSF Tir Cible</strong><br/>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+<div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br/>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+<div>💬 <a href="contact.html">Nous contacter</a></div>
+<div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+</div>
+</footer>
+<script>
+  const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const caseProgrammer = document.getElementById('case-programmer');
+  const champDate = document.getElementById('champ-date');
+  const boutonEnvoyer = document.getElementById('bouton-envoyer');
+
+  caseProgrammer.addEventListener('change', () => {
+    champDate.style.display = caseProgrammer.checked ? 'block' : 'none';
+    boutonEnvoyer.textContent = caseProgrammer.checked ? "Programmer l'envoi" : "Envoyer la notification";
+  });
+
+  function afficherStatut(texte, type) {
+    const msg = document.getElementById('msg-statut');
+    msg.textContent = texte;
+    msg.className = 'msg-statut ' + type;
+  }
+
+  async function envoyerNotification() {
+    const titre = document.getElementById('champ-titre').value.trim();
+    const message = document.getElementById('champ-message').value.trim();
+
+    if (!titre || !message) {
+      afficherStatut("⚠️ Remplis le titre et le message.", "avert");
+      return;
+    }
+
+    let dateISO;
+    if (caseProgrammer.checked) {
+      const valeurDate = document.getElementById('champ-date-heure').value;
+      if (!valeurDate) {
+        afficherStatut("⚠️ Choisis une date et une heure.", "avert");
+        return;
+      }
+      const dateChoisie = new Date(valeurDate);
+      if (dateChoisie <= new Date()) {
+        afficherStatut("⚠️ Choisis une heure dans le futur.", "avert");
+        return;
+      }
+      dateISO = dateChoisie.toISOString();
+    } else {
+      dateISO = new Date().toISOString();
+    }
+
+    boutonEnvoyer.disabled = true;
+    boutonEnvoyer.textContent = "Envoi en cours...";
+
+    const { error } = await sb.from('notifications_programmees').insert({
+      titre: titre,
+      message: message,
+      date_prevue: dateISO
+    });
+
+    boutonEnvoyer.disabled = false;
+    boutonEnvoyer.textContent = caseProgrammer.checked ? "Programmer l'envoi" : "Envoyer la notification";
+
+    if (error) {
+      afficherStatut("❌ Échec de l'envoi : " + error.message, "erreur");
+      return;
+    }
+
+    if (caseProgrammer.checked) {
+      const dateAffichee = new Date(document.getElementById('champ-date-heure').value);
+      afficherStatut("🕒 Notification programmée pour le " + dateAffichee.toLocaleString('fr-FR'), "ok");
+    } else {
+      afficherStatut("✅ Notification envoyée (sous une minute).", "ok");
+    }
+
+    document.getElementById('champ-titre').value = "";
+    document.getElementById('champ-message').value = "";
+  }
+</script>
+</body>
+</html>

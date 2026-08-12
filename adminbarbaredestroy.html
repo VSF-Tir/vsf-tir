@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex, nofollow" name="robots"/>
+<title>Administration — VSF Tir Cible</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .conteneur-admin-acces { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .bloc-menu { display: none; }
+  .bienvenue-admin { text-align: center; margin-bottom: 2rem; }
+  .bienvenue-admin span { color: var(--or); }
+  .btn-deco { background: none; border: 1px solid var(--or); color: var(--or); border-radius: 8px; padding: 0.4rem 0.9rem; cursor: pointer; font-family: var(--police-donnee); font-size: 0.8rem; }
+
+  .menu-admin { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 1.4rem; margin-top: 1.5rem; }
+  .lien-admin {
+    display: block; background: var(--fond-carte); border-radius: var(--rayon); padding: 1.5rem;
+    border-top: 4px solid var(--menthe); box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+    text-decoration: none; transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .lien-admin:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.35); }
+  .lien-admin h3 { font-size: 1.05rem; color: #fff; margin: 0 0 0.3rem; }
+  .lien-admin p { margin: 0; color: var(--texte-att); font-size: 0.88rem; }
+</style>
+</head>
+<body>
+<header class="entete">
+<div class="nav-conteneur">
+<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+</div>
+</header>
+<div class="conteneur-admin-acces">
+
+<div class="bloc-menu" id="bloc-menu">
+<div class="bienvenue-admin">
+<p>Connecté en tant que <span id="nom-admin"></span> —
+    <button class="btn-deco" onclick="deconnecterAdmin()">Se déconnecter</button>
+</p>
+</div>
+<div class="menu-admin">
+<a class="lien-admin" href="notification.html">
+<h3>📣 Notifications</h3>
+<p>Envoyer ou programmer une notification à tous les licenciés.</p>
+</a>
+<a class="lien-admin" href="dinetchristophe28.html">
+<h3>📅 Planning</h3>
+<p>Gérer l'agenda et les créneaux de réservation.</p>
+</a>
+<a class="lien-admin" href="uhppote.html">
+<h3>🔐 UHPPOTE</h3>
+<p>Schémas techniques du contrôle d'accès.</p>
+</a>
+<a class="lien-admin" href="tutoreservation.html">
+<h3>❓ Tuto réservation</h3>
+<p>Guide d'utilisation du système de réservation.</p>
+</a>
+<a class="lien-admin" href="confidentialite-app.html">
+<h3>📄 Confidentialité</h3>
+<p>Politique de confidentialité de l'application.</p>
+</a>
+</div>
+</div>
+
+</div>
+<footer class="pied">
+<div class="pied-conteneur">
+<div class="pied-marque"><img alt="VSF Tir Cible" src="ImageSite/logo_club.png"/><div><strong>VSF Tir Cible</strong><br/>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+<div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br/>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+<div>💬 <a href="contact.html">Nous contacter</a></div>
+<div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+</div>
+</footer>
+<script>
+  // Liste des identifiants (colonne "identifiant" de la table comptes) autorisés ici.
+  const ADMIN_IDS = ["hinser", "dinchr"];
+
+  const brut = sessionStorage.getItem('vsf_admin');
+  const data = brut ? JSON.parse(brut) : null;
+
+  if (!data || !ADMIN_IDS.includes(data.identifiant)) {
+    // Pas de session admin valide -> retour discret vers la page de connexion normale.
+    window.location.href = 'reservation.html';
+  } else {
+    document.getElementById('bloc-menu').style.display = 'block';
+    document.getElementById('nom-admin').textContent = data.prenom + " " + data.nom;
+  }
+
+  function deconnecterAdmin() {
+    sessionStorage.removeItem('vsf_admin');
+    window.location.href = 'reservation.html';
+  }
+</script>
+</body>
+</html>
