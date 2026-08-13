@@ -255,7 +255,12 @@
       const case_ = document.createElement('div');
       case_.className = 'case-jour';
 
-      if (assigne) {
+if (assigne && assigne.identifiant === 'FERME') {
+        case_.style.borderColor = "#ff0000";
+        case_.style.background = "#c0392b";
+        case_.innerHTML = `<div class="numero">${jour}</div>` +
+          `<div class="nom-assigne" style="color:#fff;background:#8e0000;">🔒 Fermé</div>`;
+      } else if (assigne) {
         const couleur = couleurMembre(assigne.identifiant);
         case_.style.borderColor = couleur;
         case_.style.background = couleur + "1A";
@@ -300,6 +305,12 @@
       });
     }
 
+const itemFerme = document.createElement('div');
+    itemFerme.className = 'item-menu';
+    itemFerme.innerHTML = `<span class="pastille-menu" style="background:#e74c3c;"></span>🔒 Fermé`;
+    itemFerme.onclick = () => assignerFerme(dateStr);
+    menu.appendChild(itemFerme);
+
     const separateur = document.createElement('div');
     separateur.className = 'separateur';
     menu.appendChild(separateur);
@@ -339,7 +350,7 @@
     menu.style.top = top + "px";
   }
 
-  async function assignerPermanence(dateStr, membre) {
+async function assignerPermanence(dateStr, membre) {
     await sb.from('permanences').upsert({
       date: dateStr,
       identifiant: membre.identifiant,
@@ -347,14 +358,45 @@
       prenom: membre.prenom,
       updated_at: new Date().toISOString()
     });
+    notifierSiBesoin(dateStr, "attribue", membre.prenom + " " + membre.nom);
     fermerMenu();
     chargerMois();
   }
 
-  async function supprimerPermanence(dateStr) {
-    await sb.from('permanences').delete().eq('date', dateStr);
+  async function assignerFerme(dateStr) {
+    await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: 'FERME',
+      nom: 'Fermé',
+      prenom: '',
+      updated_at: new Date().toISOString()
+    });
     fermerMenu();
     chargerMois();
+  }
+
+async function supprimerPermanence(dateStr) {
+    await sb.from('permanences').delete().eq('date', dateStr);
+    notifierSiBesoin(dateStr, "supprime", null);
+    fermerMenu();
+    chargerMois();
+  }
+
+  function notifierSiBesoin(dateStr, action, cible) {
+    if (ADMIN_IDS.includes(sessionData.identifiant)) return; // Christophe et Serge ne déclenchent pas de mail
+
+    fetch("https://xndpmjuzdqwexnligrwh.supabase.co/functions/v1/notifier-permanence", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        identifiantAuteur: sessionData.identifiant,
+        prenomAuteur: sessionData.prenom,
+        nomAuteur: sessionData.nom,
+        date: dateStr,
+        action: action,
+        cible: cible
+      })
+    }).catch(() => {}); // ne bloque jamais l'interface si l'envoi échoue
   }
 
   document.addEventListener('click', (evt) => {
