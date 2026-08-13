@@ -351,6 +351,10 @@ const itemFerme = document.createElement('div');
   }
 
 async function assignerPermanence(dateStr, membre) {
+    const ancien = permanencesDuMois[dateStr];
+    const ancienNom = (ancien && ancien.identifiant !== 'FERME' && ancien.identifiant !== membre.identifiant)
+      ? (ancien.prenom + " " + ancien.nom) : null;
+
     await sb.from('permanences').upsert({
       date: dateStr,
       identifiant: membre.identifiant,
@@ -358,7 +362,7 @@ async function assignerPermanence(dateStr, membre) {
       prenom: membre.prenom,
       updated_at: new Date().toISOString()
     });
-    notifierSiBesoin(dateStr, "attribue", membre.prenom + " " + membre.nom);
+    notifierSiBesoin(dateStr, "attribue", membre.prenom + " " + membre.nom, ancienNom);
     fermerMenu();
     chargerMois();
   }
@@ -382,10 +386,10 @@ async function supprimerPermanence(dateStr) {
     chargerMois();
   }
 
-  function notifierSiBesoin(dateStr, action, cible) {
+function notifierSiBesoin(dateStr, action, cible, ancien) {
     if (ADMIN_IDS.includes(sessionData.identifiant)) return; // Christophe et Serge ne déclenchent pas de mail
 
-fetch("https://xndpmjuzdqwexnligrwh.supabase.co/functions/v1/notifier-permanence", {
+    fetch("https://xndpmjuzdqwexnligrwh.supabase.co/functions/v1/notifier-permanence", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -397,7 +401,8 @@ fetch("https://xndpmjuzdqwexnligrwh.supabase.co/functions/v1/notifier-permanence
         nomAuteur: sessionData.nom,
         date: dateStr,
         action: action,
-        cible: cible
+        cible: cible,
+        ancien: ancien || null
       })
     }).catch(() => {}); // ne bloque jamais l'interface si l'envoi échoue
   }
