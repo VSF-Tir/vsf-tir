@@ -385,9 +385,12 @@ async function supprimerPermanence(dateStr) {
   function notifierSiBesoin(dateStr, action, cible) {
     if (ADMIN_IDS.includes(sessionData.identifiant)) return; // Christophe et Serge ne déclenchent pas de mail
 
-    fetch("https://xndpmjuzdqwexnligrwh.supabase.co/functions/v1/notifier-permanence", {
+fetch("https://xndpmjuzdqwexnligrwh.supabase.co/functions/v1/notifier-permanence", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + SUPABASE_KEY,
+      },
       body: JSON.stringify({
         identifiantAuteur: sessionData.identifiant,
         prenomAuteur: sessionData.prenom,
