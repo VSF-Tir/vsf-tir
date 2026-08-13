@@ -20,6 +20,12 @@
     padding: 0.4rem 0.8rem; cursor: pointer; font-family: var(--police-donnee); margin-left: 0.5rem;
   }
 
+  /* ===== Légende des couleurs par membre (cliquable pour changer) ===== */
+  .legende-membres { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.2rem; }
+  .legende-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--texte-att); cursor: pointer; padding: 3px 6px; border-radius: 6px; }
+  .legende-item:hover { background: rgba(255,255,255,0.06); }
+  .legende-pastille { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
   .grille-calendrier { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
   .entete-jour-semaine {
     text-align: center; font-family: var(--police-donnee); font-size: 0.7rem; color: var(--texte-att);
@@ -32,27 +38,41 @@
   }
   .case-jour.vide { background: transparent; cursor: default; }
   .case-jour:not(.vide):hover { border-color: var(--or); }
-  .case-jour.occupe { border-color: var(--menthe); background: rgba(80,200,150,0.10); }
   .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
   .case-jour .nom-assigne {
-    font-family: var(--police-donnee); font-size: 0.72rem; color: var(--menthe);
-    background: rgba(80,200,150,0.15); border-radius: 6px; padding: 2px 5px;
+    font-family: var(--police-donnee); font-size: 0.7rem; font-weight: 600; border-radius: 6px; padding: 2px 5px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
-  /* Menu déroulant flottant */
+  /* Menu déroulant flottant (assignation + sélecteur de couleur) */
   .menu-perma {
-    display: none; position: absolute; z-index: 50; min-width: 220px; max-height: 320px; overflow-y: auto;
+    display: none; position: absolute; z-index: 50; width: min(240px, calc(100vw - 20px));
+    max-height: 320px; overflow-y: auto;
     background: var(--fond-carte); border: 1px solid var(--or); border-radius: 10px;
     box-shadow: 0 14px 30px rgba(0,0,0,0.45); padding: 0.4rem;
   }
-  .menu-perma .item-menu {
-    padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; color: var(--texte);
-  }
+  .menu-perma .item-menu { display: flex; align-items: center; gap: 8px; padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; color: var(--texte); }
   .menu-perma .item-menu:hover { background: rgba(217,154,61,0.15); }
+  .menu-perma .pastille-menu { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .menu-perma .separateur { height: 1px; background: rgba(255,255,255,0.1); margin: 0.35rem 0; }
   .menu-perma .item-supprimer { color: #ff8a75; }
   .menu-perma .item-annuler { color: var(--texte-att); }
+
+  /* ===== Version mobile ===== */
+  @media (max-width: 600px) {
+    .conteneur-perma { padding: 1rem 0.7rem 3rem; }
+    .conteneur-perma > h2 { font-size: 1.15rem; }
+    .entete-calendrier { flex-direction: column; align-items: flex-start; margin: 0.6rem 0 1rem; }
+    .entete-calendrier h2 { font-size: 1rem; }
+    .nav-mois { display: flex; width: 100%; gap: 0.5rem; }
+    .nav-mois button { flex: 1; margin-left: 0; padding: 0.5rem 0.4rem; font-size: 0.78rem; }
+    .grille-calendrier { gap: 3px; }
+    .entete-jour-semaine { font-size: 0.6rem; padding-bottom: 2px; }
+    .case-jour { padding: 0.25rem; border-radius: 6px; }
+    .case-jour .numero { font-size: 0.75rem; }
+    .case-jour .nom-assigne { font-size: 0.55rem; padding: 1px 3px; line-height: 1.3; }
+    .legende-membres { gap: 0.4rem 0.7rem; font-size: 0.72rem; margin-bottom: 1rem; }
+  }
 </style>
 </head>
 <body>
@@ -63,7 +83,9 @@
 </header>
 <div class="conteneur-perma">
 <h2 style="color:var(--menthe);">📅 Planning des permanences</h2>
-<p style="color:var(--texte-att);font-size:0.9rem;margin-top:-0.6rem;">Clique sur un jour pour assigner un membre du bureau.</p>
+<p style="color:var(--texte-att);font-size:0.9rem;margin-top:-0.6rem;">Clique sur un jour pour assigner un membre du bureau. Clique sur un nom ci-dessous pour changer sa couleur.</p>
+
+<div class="legende-membres" id="legende-membres"></div>
 
 <div class="entete-calendrier">
 <h2 id="titre-mois"></h2>
@@ -95,6 +117,20 @@
   const NOMS_MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
   const NOMS_JOURS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
 
+  // 20 couleurs au choix, assignées manuellement à chaque membre (clic sur
+  // son nom dans la légende) et stockées dans comptes.couleur.
+  const PALETTE_COULEURS = [
+    "#e67e22","#9b59b6","#3498db","#e84393","#f1c40f",
+    "#2ecc71","#e74c3c","#16a085","#8e44ad","#d35400",
+    "#27ae60","#2980b9","#c0392b","#f39c12","#1abc9c",
+    "#8e5ea2","#d63384","#0984e3","#6c5ce7","#00b894",
+  ];
+
+  function couleurMembre(identifiant) {
+    const m = membresBureau.find(x => x.identifiant === identifiant);
+    return (m && m.couleur) ? m.couleur : "#7f8c8d";
+  }
+
   let moisAffiche = new Date();
   moisAffiche.setDate(1);
   let permanencesDuMois = {}; // { "2026-08-13": { identifiant, nom, prenom } }
@@ -111,10 +147,54 @@
   async function chargerMembresBureau() {
     const { data, error } = await sb
       .from('comptes')
-      .select('identifiant, nom, prenom')
+      .select('identifiant, nom, prenom, couleur')
       .eq('membre_bureau', true)
       .order('prenom', { ascending: true });
     if (!error) membresBureau = data || [];
+    dessinerLegende();
+  }
+
+  function dessinerLegende() {
+    const legende = document.getElementById('legende-membres');
+    legende.innerHTML = "";
+    membresBureau.forEach(m => {
+      const couleur = couleurMembre(m.identifiant);
+      const item = document.createElement('div');
+      item.className = 'legende-item';
+      item.innerHTML = `<span class="legende-pastille" style="background:${couleur};"></span>${m.prenom} ${m.nom}`;
+      item.onclick = (evt) => ouvrirSelecteurCouleur(evt, m, item);
+      legende.appendChild(item);
+    });
+  }
+
+  async function ouvrirSelecteurCouleur(evt, membre, itemElement) {
+    evt.stopPropagation();
+    const menu = document.getElementById('menu-perma');
+    menu.innerHTML = "";
+
+    PALETTE_COULEURS.forEach(c => {
+      const swatch = document.createElement('div');
+      swatch.className = 'item-menu';
+      swatch.innerHTML = `<span class="pastille-menu" style="background:${c};"></span>${c === membre.couleur ? '✓ Sélectionnée' : 'Choisir'}`;
+      swatch.onclick = async () => {
+        await sb.from('comptes').update({ couleur: c }).eq('identifiant', membre.identifiant);
+        menu.style.display = 'none';
+        await chargerMembresBureau();
+        chargerMois();
+      };
+      menu.appendChild(swatch);
+    });
+
+    menu.style.display = "block";
+    const menuRect = menu.getBoundingClientRect();
+    const rect = itemElement.getBoundingClientRect();
+
+    let left = window.scrollX + rect.left;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - menuRect.width - 10;
+    if (left > maxLeft) left = Math.max(window.scrollX + 10, maxLeft);
+
+    menu.style.left = left + "px";
+    menu.style.top = (window.scrollY + rect.bottom + 6) + "px";
   }
 
   async function chargerMois() {
@@ -170,10 +250,19 @@
       const assigne = permanencesDuMois[dateStr];
 
       const case_ = document.createElement('div');
-      case_.className = 'case-jour' + (assigne ? ' occupe' : '');
-      case_.innerHTML = `<div class="numero">${jour}</div>` +
-        (assigne ? `<div class="nom-assigne">${assigne.prenom} ${assigne.nom}</div>` : '');
-      case_.onclick = (evt) => ouvrirMenu(evt, dateStr, case_);
+      case_.className = 'case-jour';
+
+      if (assigne) {
+        const couleur = couleurMembre(assigne.identifiant);
+        case_.style.borderColor = couleur;
+        case_.style.background = couleur + "1A";
+        case_.innerHTML = `<div class="numero">${jour}</div>` +
+          `<div class="nom-assigne" style="color:${couleur};background:${couleur}33;">${assigne.prenom} ${assigne.nom}</div>`;
+      } else {
+        case_.innerHTML = `<div class="numero">${jour}</div>`;
+      }
+
+      case_.onclick = (evt) => ouvrirMenuJour(evt, dateStr, case_);
       grille.appendChild(case_);
     }
   }
@@ -185,7 +274,7 @@
     document.getElementById('menu-perma').style.display = 'none';
   }
 
-  async function ouvrirMenu(evt, dateStr, caseElement) {
+  async function ouvrirMenuJour(evt, dateStr, caseElement) {
     evt.stopPropagation();
 
     if (membresBureau.length === 0) {
@@ -199,9 +288,10 @@
       menu.innerHTML = `<div class="item-menu" style="color:var(--texte-att);cursor:default;">Aucun membre du bureau</div>`;
     } else {
       membresBureau.forEach(m => {
+        const couleur = couleurMembre(m.identifiant);
         const item = document.createElement('div');
         item.className = 'item-menu';
-        item.textContent = m.prenom + " " + m.nom;
+        item.innerHTML = `<span class="pastille-menu" style="background:${couleur};"></span>${m.prenom} ${m.nom}`;
         item.onclick = () => assignerPermanence(dateStr, m);
         menu.appendChild(item);
       });
@@ -223,10 +313,27 @@
     itemAnnuler.onclick = fermerMenu;
     menu.appendChild(itemAnnuler);
 
-    const rect = caseElement.getBoundingClientRect();
-    menu.style.left = (window.scrollX + rect.left) + "px";
-    menu.style.top = (window.scrollY + rect.bottom + 6) + "px";
+    // Affichage d'abord (mesurable) pour calculer sa taille réelle avant de
+    // le positionner, sinon impossible de savoir s'il dépasse de l'écran
+    // (surtout sur téléphone).
     menu.style.display = "block";
+    const menuRect = menu.getBoundingClientRect();
+    const rect = caseElement.getBoundingClientRect();
+
+    let left = window.scrollX + rect.left;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - menuRect.width - 10;
+    if (left > maxLeft) left = Math.max(window.scrollX + 10, maxLeft);
+
+    let top = window.scrollY + rect.bottom + 6;
+    const maxTop = window.scrollY + document.documentElement.clientHeight - menuRect.height - 10;
+    if (top > maxTop) {
+      // Pas la place en dessous -> on ouvre le menu au-dessus de la case.
+      top = window.scrollY + rect.top - menuRect.height - 6;
+      if (top < window.scrollY + 10) top = window.scrollY + 10;
+    }
+
+    menu.style.left = left + "px";
+    menu.style.top = top + "px";
   }
 
   async function assignerPermanence(dateStr, membre) {
@@ -254,7 +361,7 @@
     }
   });
 
-// Sécurité : accès réservé aux admins et aux membres du bureau
+  // Sécurité : accès réservé aux admins et aux membres du bureau
   // (session déposée par reservation.html à la connexion).
   const ADMIN_IDS = ["hinser", "dinchr"];
   const sessionBrute = sessionStorage.getItem('vsf_admin');
