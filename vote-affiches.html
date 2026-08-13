@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex, nofollow" name="robots"/>
+<title>Vote affiches — VSF Tir Cible</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .conteneur-vote { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .grille-affiches { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.4rem; margin-top: 1.5rem; }
+  .carte-affiche {
+    background: var(--fond-carte); border-radius: var(--rayon); overflow: hidden;
+    border: 2px solid transparent; transition: border-color 0.15s ease;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+  }
+  .carte-affiche.votee-par-moi { border-color: var(--menthe); }
+  .carte-affiche img { width: 100%; display: block; aspect-ratio: 3/4; object-fit: cover; cursor: zoom-in; }
+  .bloc-votes {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+    padding: 0.7rem 0.9rem; font-family: var(--police-donnee);
+  }
+  .nombre-votes { font-size: 1.3rem; font-weight: 700; color: var(--or); }
+  .label-votes { font-size: 0.72rem; color: var(--texte-att); text-transform: uppercase; }
+  .badge-mon-vote { font-size: 0.68rem; color: var(--menthe); white-space: nowrap; }
+  .btn-voter {
+    background: var(--rouge); color: #fff; border: none; border-radius: 8px;
+    padding: 0.45rem 0.8rem; font-family: var(--police-titre); font-weight: 600; font-size: 0.82rem;
+    cursor: pointer; white-space: nowrap;
+  }
+  .btn-voter:hover { background: var(--or); color: #1e1e1e; }
+
+  /* Menu déroulant flottant (liste des membres) */
+  .menu-vote {
+    display: none; position: absolute; z-index: 60; width: min(240px, calc(100vw - 20px));
+    max-height: 320px; overflow-y: auto;
+    background: var(--fond-carte); border: 1px solid var(--or); border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.45); padding: 0.4rem;
+  }
+  .menu-vote .item-menu { padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; color: var(--texte); }
+  .menu-vote .item-menu:hover { background: rgba(217,154,61,0.15); }
+
+  /* Zoom plein écran */
+  .fond-zoom {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100;
+    display: flex; align-items: center; justify-content: center; cursor: zoom-out;
+  }
+  .fond-zoom img { max-width: 92vw; max-height: 92vh; border-radius: 10px; }
+
+  @media (max-width: 600px) {
+    .conteneur-vote { padding: 1rem 0.7rem 3rem; }
+    .grille-affiches { grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+    .nombre-votes { font-size: 1.05rem; }
+    .bloc-votes { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+    .btn-voter { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header class="entete">
+<div class="nav-conteneur">
+<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+</div>
+</header>
+<div class="conteneur-vote">
+<h2 style="color:var(--menthe);">🗳️ Vote des affiches</h2>
+<p style="color:var(--texte-att);font-size:0.9rem;margin-top:-0.6rem;">Clique sur une image pour l'agrandir, ou sur "Voter" pour choisir. Un seul vote par personne — revoter ailleurs annule ton vote précédent.</p>
+
+<div class="grille-affiches" id="grille-affiches"></div>
+</div>
+
+<div class="menu-vote" id="menu-vote"></div>
+
+<footer class="pied">
+<div class="pied-conteneur">
+<div class="pied-marque"><img alt="VSF Tir Cible" src="ImageSite/logo_club.png"/><div><strong>VSF Tir Cible</strong><br/>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+<div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br/>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+<div>💬 <a href="contact.html">Nous contacter</a></div>
+<div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+</div>
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const AFFICHES = [1, 2, 3, 4, 5, 6, 7].map(n => ({
+    id: n,
+    fichier: `voteafficheandroid/affiche${n}.jpg`
+  }));
+
+  let membresBureau = [];
+  let votes = []; // toutes les lignes de votes_affiches
+  let dernierVotant = null; // pour savoir "mon vote" sans login (dernier nom choisi dans ce navigateur)
+
+  async function chargerMembresBureau() {
+    const { data, error } = await sb
+      .from('comptes')
+      .select('identifiant, nom, prenom')
+      .eq('membre_bureau', true)
+      .order('prenom', { ascending: true });
+    if (!error) membresBureau = data || [];
+  }
+
+  async function chargerVotes() {
+    const { data, error } = await sb.from('votes_affiches').select('*');
+    if (!error) votes = data || [];
+    dessinerGrille();
+  }
+
+  function dessinerGrille() {
+    const grille = document.getElementById('grille-affiches');
+    grille.innerHTML = "";
+
+    AFFICHES.forEach(affiche => {
+      const nbVotes = votes.filter(v => v.affiche_id === affiche.id).length;
+      const monVote = dernierVotant ? votes.find(v => v.identifiant === dernierVotant.identifiant) : null;
+      const jAiVote = monVote && monVote.affiche_id === affiche.id;
+
+      const carte = document.createElement('div');
+      carte.className = 'carte-affiche' + (jAiVote ? ' votee-par-moi' : '');
+      carte.innerHTML = `
+        <img src="${affiche.fichier}" alt="Affiche ${affiche.id}"/>
+        <div class="bloc-votes">
+          <div>
+            <div class="nombre-votes">${nbVotes}</div>
+            <div class="label-votes">vote${nbVotes > 1 ? 's' : ''}</div>
+          </div>
+          ${jAiVote ? '<div class="badge-mon-vote">✓ Ton vote</div>' : '<button class="btn-voter">🗳️ Voter</button>'}
+        </div>
+      `;
+
+      carte.querySelector('img').onclick = () => ouvrirZoom(affiche);
+
+      const btn = carte.querySelector('.btn-voter');
+      if (btn) btn.onclick = (evt) => ouvrirMenuVote(evt, affiche, btn);
+
+      grille.appendChild(carte);
+    });
+  }
+
+  function ouvrirZoom(affiche) {
+    const fond = document.createElement('div');
+    fond.className = 'fond-zoom';
+    fond.innerHTML = `<img src="${affiche.fichier}"/>`;
+    fond.onclick = () => fond.remove();
+    document.body.appendChild(fond);
+  }
+
+  function fermerMenu() {
+    document.getElementById('menu-vote').style.display = 'none';
+  }
+
+  async function ouvrirMenuVote(evt, affiche, boutonElement) {
+    evt.stopPropagation();
+
+    if (membresBureau.length === 0) {
+      await chargerMembresBureau();
+    }
+
+    const menu = document.getElementById('menu-vote');
+    menu.innerHTML = "";
+
+    const identifiantsDejaIci = votes.filter(v => v.affiche_id === affiche.id).map(v => v.identifiant);
+    const restants = membresBureau.filter(m => !identifiantsDejaIci.includes(m.identifiant));
+
+    if (restants.length === 0) {
+      menu.innerHTML = `<div class="item-menu" style="color:var(--texte-att);cursor:default;">Tout le monde a déjà voté</div>`;
+    } else {
+      restants.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'item-menu';
+        item.textContent = m.prenom + " " + m.nom;
+        item.onclick = () => voter(affiche.id, m);
+        menu.appendChild(item);
+      });
+    }
+
+    menu.style.display = "block";
+    const menuRect = menu.getBoundingClientRect();
+    const rect = boutonElement.getBoundingClientRect();
+
+    let left = window.scrollX + rect.left;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - menuRect.width - 10;
+    if (left > maxLeft) left = Math.max(window.scrollX + 10, maxLeft);
+
+    let top = window.scrollY + rect.bottom + 6;
+    const maxTop = window.scrollY + document.documentElement.clientHeight - menuRect.height - 10;
+    if (top > maxTop) {
+      top = window.scrollY + rect.top - menuRect.height - 6;
+      if (top < window.scrollY + 10) top = window.scrollY + 10;
+    }
+
+    menu.style.left = left + "px";
+    menu.style.top = top + "px";
+  }
+
+  async function voter(afficheId, membre) {
+    await sb.from('votes_affiches').upsert({
+      identifiant: membre.identifiant,
+      affiche_id: afficheId,
+      prenom: membre.prenom,
+      nom: membre.nom,
+      updated_at: new Date().toISOString()
+    });
+    dernierVotant = membre;
+    fermerMenu();
+    await chargerVotes();
+  }
+
+  document.addEventListener('click', (evt) => {
+    const menu = document.getElementById('menu-vote');
+    if (menu.style.display === 'block' && !menu.contains(evt.target)) {
+      fermerMenu();
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    chargerMembresBureau();
+    chargerVotes();
+  });
+</script>
+</body>
+</html>
