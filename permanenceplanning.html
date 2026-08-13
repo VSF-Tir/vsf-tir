@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex, nofollow" name="robots"/>
+<title>Planning des permanences — VSF Tir Cible</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .conteneur-perma { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .entete-calendrier { display: flex; justify-content: space-between; align-items: center; margin: 1rem 0 1.5rem; flex-wrap: wrap; gap: 0.6rem; }
+  .entete-calendrier h2 { color: var(--menthe); margin: 0; text-transform: capitalize; }
+  .nav-mois button {
+    background: none; border: 1px solid var(--or); color: var(--or); border-radius: 8px;
+    padding: 0.4rem 0.8rem; cursor: pointer; font-family: var(--police-donnee); margin-left: 0.5rem;
+  }
+
+  .grille-calendrier { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .entete-jour-semaine {
+    text-align: center; font-family: var(--police-donnee); font-size: 0.7rem; color: var(--texte-att);
+    text-transform: uppercase; padding-bottom: 4px;
+  }
+  .case-jour {
+    aspect-ratio: 1; background: var(--fond-carte); border-radius: 10px; padding: 0.5rem;
+    cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;
+    border: 1px solid transparent; transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .case-jour.vide { background: transparent; cursor: default; }
+  .case-jour:not(.vide):hover { border-color: var(--or); }
+  .case-jour.occupe { border-color: var(--menthe); background: rgba(80,200,150,0.10); }
+  .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
+  .case-jour .nom-assigne {
+    font-family: var(--police-donnee); font-size: 0.72rem; color: var(--menthe);
+    background: rgba(80,200,150,0.15); border-radius: 6px; padding: 2px 5px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* Menu déroulant flottant */
+  .menu-perma {
+    display: none; position: absolute; z-index: 50; min-width: 220px; max-height: 320px; overflow-y: auto;
+    background: var(--fond-carte); border: 1px solid var(--or); border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.45); padding: 0.4rem;
+  }
+  .menu-perma .item-menu {
+    padding: 0.55rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; color: var(--texte);
+  }
+  .menu-perma .item-menu:hover { background: rgba(217,154,61,0.15); }
+  .menu-perma .separateur { height: 1px; background: rgba(255,255,255,0.1); margin: 0.35rem 0; }
+  .menu-perma .item-supprimer { color: #ff8a75; }
+  .menu-perma .item-annuler { color: var(--texte-att); }
+</style>
+</head>
+<body>
+<header class="entete">
+<div class="nav-conteneur">
+<a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+</div>
+</header>
+<div class="conteneur-perma">
+<h2 style="color:var(--menthe);">📅 Planning des permanences</h2>
+<p style="color:var(--texte-att);font-size:0.9rem;margin-top:-0.6rem;">Clique sur un jour pour assigner un membre du bureau.</p>
+
+<div class="entete-calendrier">
+<h2 id="titre-mois"></h2>
+<div class="nav-mois">
+<button onclick="changerMois(-1)">← Mois précédent</button>
+<button onclick="changerMois(1)">Mois suivant →</button>
+</div>
+</div>
+
+<div class="grille-calendrier" id="grille-calendrier"></div>
+</div>
+
+<div class="menu-perma" id="menu-perma"></div>
+
+<footer class="pied">
+<div class="pied-conteneur">
+<div class="pied-marque"><img alt="VSF Tir Cible" src="ImageSite/logo_club.png"/><div><strong>VSF Tir Cible</strong><br/>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+<div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br/>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+<div>💬 <a href="contact.html">Nous contacter</a></div>
+<div class="mentions">SIRET : 433 664 059 00022 — APE : 9312 Z — DDJS : 454EPS/1-2-EAPS ET 000389 — RNA : W 722000225</div>
+</div>
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const NOMS_MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const NOMS_JOURS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+
+  let moisAffiche = new Date();
+  moisAffiche.setDate(1);
+  let permanencesDuMois = {}; // { "2026-08-13": { identifiant, nom, prenom } }
+  let membresBureau = [];
+
+  function formaterISO(date) {
+    // Ne jamais utiliser toISOString() ici (décalage UTC).
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const j = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${j}`;
+  }
+
+  async function chargerMembresBureau() {
+    const { data, error } = await sb
+      .from('comptes')
+      .select('identifiant, nom, prenom')
+      .eq('membre_bureau', true)
+      .order('prenom', { ascending: true });
+    if (!error) membresBureau = data || [];
+  }
+
+  async function chargerMois() {
+    document.getElementById('titre-mois').textContent =
+      NOMS_MOIS[moisAffiche.getMonth()] + " " + moisAffiche.getFullYear();
+
+    const debutMois = new Date(moisAffiche.getFullYear(), moisAffiche.getMonth(), 1);
+    const finMois = new Date(moisAffiche.getFullYear(), moisAffiche.getMonth() + 1, 0);
+
+    const { data } = await sb
+      .from('permanences')
+      .select('*')
+      .gte('date', formaterISO(debutMois))
+      .lte('date', formaterISO(finMois));
+
+    permanencesDuMois = {};
+    (data || []).forEach(p => { permanencesDuMois[p.date] = p; });
+
+    dessinerGrille(debutMois, finMois);
+  }
+
+  function changerMois(delta) {
+    moisAffiche.setMonth(moisAffiche.getMonth() + delta);
+    fermerMenu();
+    chargerMois();
+  }
+
+  function dessinerGrille(debutMois, finMois) {
+    const grille = document.getElementById('grille-calendrier');
+    grille.innerHTML = "";
+
+    NOMS_JOURS.forEach(j => {
+      const e = document.createElement('div');
+      e.className = 'entete-jour-semaine';
+      e.textContent = j;
+      grille.appendChild(e);
+    });
+
+    // Décalage : getDay() = 0 (dimanche) -> 6, 1 (lundi) -> 0, etc.
+    let decalage = debutMois.getDay() - 1;
+    if (decalage < 0) decalage = 6;
+
+    for (let i = 0; i < decalage; i++) {
+      const vide = document.createElement('div');
+      vide.className = 'case-jour vide';
+      grille.appendChild(vide);
+    }
+
+    const totalJours = finMois.getDate();
+    for (let jour = 1; jour <= totalJours; jour++) {
+      const dateObj = new Date(moisAffiche.getFullYear(), moisAffiche.getMonth(), jour);
+      const dateStr = formaterISO(dateObj);
+      const assigne = permanencesDuMois[dateStr];
+
+      const case_ = document.createElement('div');
+      case_.className = 'case-jour' + (assigne ? ' occupe' : '');
+      case_.innerHTML = `<div class="numero">${jour}</div>` +
+        (assigne ? `<div class="nom-assigne">${assigne.prenom} ${assigne.nom}</div>` : '');
+      case_.onclick = (evt) => ouvrirMenu(evt, dateStr, case_);
+      grille.appendChild(case_);
+    }
+  }
+
+  // ============================================================
+  // Menu déroulant flottant (liste des membres + Supprimer / Annuler)
+  // ============================================================
+  function fermerMenu() {
+    document.getElementById('menu-perma').style.display = 'none';
+  }
+
+  async function ouvrirMenu(evt, dateStr, caseElement) {
+    evt.stopPropagation();
+
+    if (membresBureau.length === 0) {
+      await chargerMembresBureau();
+    }
+
+    const menu = document.getElementById('menu-perma');
+    menu.innerHTML = "";
+
+    if (membresBureau.length === 0) {
+      menu.innerHTML = `<div class="item-menu" style="color:var(--texte-att);cursor:default;">Aucun membre du bureau</div>`;
+    } else {
+      membresBureau.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'item-menu';
+        item.textContent = m.prenom + " " + m.nom;
+        item.onclick = () => assignerPermanence(dateStr, m);
+        menu.appendChild(item);
+      });
+    }
+
+    const separateur = document.createElement('div');
+    separateur.className = 'separateur';
+    menu.appendChild(separateur);
+
+    const itemSupprimer = document.createElement('div');
+    itemSupprimer.className = 'item-menu item-supprimer';
+    itemSupprimer.textContent = '🗑️ Supprimer';
+    itemSupprimer.onclick = () => supprimerPermanence(dateStr);
+    menu.appendChild(itemSupprimer);
+
+    const itemAnnuler = document.createElement('div');
+    itemAnnuler.className = 'item-menu item-annuler';
+    itemAnnuler.textContent = '✖️ Annuler';
+    itemAnnuler.onclick = fermerMenu;
+    menu.appendChild(itemAnnuler);
+
+    const rect = caseElement.getBoundingClientRect();
+    menu.style.left = (window.scrollX + rect.left) + "px";
+    menu.style.top = (window.scrollY + rect.bottom + 6) + "px";
+    menu.style.display = "block";
+  }
+
+  async function assignerPermanence(dateStr, membre) {
+    await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: membre.identifiant,
+      nom: membre.nom,
+      prenom: membre.prenom,
+      updated_at: new Date().toISOString()
+    });
+    fermerMenu();
+    chargerMois();
+  }
+
+  async function supprimerPermanence(dateStr) {
+    await sb.from('permanences').delete().eq('date', dateStr);
+    fermerMenu();
+    chargerMois();
+  }
+
+  document.addEventListener('click', (evt) => {
+    const menu = document.getElementById('menu-perma');
+    if (menu.style.display === 'block' && !menu.contains(evt.target)) {
+      fermerMenu();
+    }
+  });
+
+// Sécurité : accès réservé aux admins et aux membres du bureau
+  // (session déposée par reservation.html à la connexion).
+  const ADMIN_IDS = ["hinser", "dinchr"];
+  const sessionBrute = sessionStorage.getItem('vsf_admin');
+  const sessionData = sessionBrute ? JSON.parse(sessionBrute) : null;
+
+  if (!sessionData || !(ADMIN_IDS.includes(sessionData.identifiant) || sessionData.membre_bureau)) {
+    window.location.href = 'reservation.html';
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      chargerMembresBureau();
+      chargerMois();
+    });
+  }
+</script>
+</body>
+</html>

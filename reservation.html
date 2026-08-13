@@ -107,6 +107,9 @@
 <label for="motdepasse">Numéro de licence</label>
 <input autocomplete="off" id="motdepasse" inputmode="numeric" type="text"/>
 </div>
+<label style="display:flex;align-items:center;gap:8px;margin:-0.4rem 0 1rem;color:var(--texte);font-size:0.9rem;">
+<input id="vsf-remember" type="checkbox"/> Se souvenir de mon identifiant et de mon numéro de licence
+</label>
 <button class="bouton-connexion" onclick="connecter()">Se connecter</button>
 <div class="msg-erreur" id="msg-login"></div>
 </div>
@@ -184,10 +187,24 @@
       return;
     }
 
+    if (document.getElementById('vsf-remember').checked) {
+      localStorage.setItem('vsf_id_memorise', id);
+      localStorage.setItem('vsf_licence_memorisee', mdp);
+    } else {
+      localStorage.removeItem('vsf_id_memorise');
+      localStorage.removeItem('vsf_licence_memorisee');
+    }
+
     const ADMIN_IDS = ["hinser", "dinchr"];
     if (ADMIN_IDS.includes(data.identifiant)) {
       sessionStorage.setItem('vsf_admin', JSON.stringify(data));
       window.location.href = 'adminbarbaredestroy.html';
+      return;
+    }
+
+    if (data.membre_bureau) {
+      sessionStorage.setItem('vsf_admin', JSON.stringify(data));
+      window.location.href = 'permanenceplanning.html';
       return;
     }
 
@@ -207,6 +224,16 @@
     document.getElementById('identifiant').value = "";
     document.getElementById('motdepasse').value = "";
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const idMemo = localStorage.getItem('vsf_id_memorise');
+    const licMemo = localStorage.getItem('vsf_licence_memorisee');
+    if (idMemo && licMemo) {
+      document.getElementById('identifiant').value = idMemo;
+      document.getElementById('motdepasse').value = licMemo;
+      document.getElementById('vsf-remember').checked = true;
+    }
+  });
 
   // ============================================================
   // Calendrier
