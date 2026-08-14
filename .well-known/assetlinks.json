@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.barbaredestroy.vsftircible",
+      "sha256_cert_fingerprints": [
+        "B9:AD:99:FE:F1:11:F5:CA:9B:EE:9D:2A:62:7A:91:57:DF:3B:F9:A9:C5:8F:90:B4:33:48:AC:86:2C:C9:BE:EA"
+      ]
+    }
+  }
+]
