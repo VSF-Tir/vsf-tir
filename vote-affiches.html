@@ -71,6 +71,7 @@
 <h2 style="color:var(--menthe);">🗳️ Vote des affiches</h2>
 <p style="color:var(--texte-att);font-size:0.9rem;margin-top:-0.6rem;">Clique sur une image pour l'agrandir, ou sur "Voter" pour choisir. Un seul vote par personne — revoter ailleurs annule ton vote précédent.</p>
 <p id="compteur-votes" style="color:var(--or);font-weight:700;font-family:var(--police-donnee);"></p>
+<div id="liste-participants" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin:1rem 0 1.4rem;"></div>
 
 <div class="grille-affiches" id="grille-affiches"></div>
 </div>
@@ -121,6 +122,15 @@ function dessinerGrille() {
     document.getElementById('compteur-votes').textContent =
       `${totalVotes} / ${totalMembres} personne${totalMembres > 1 ? 's' : ''} ont voté`;
 
+    const identifiantsAyantVote = votes.map(v => v.identifiant);
+    const listeParticipants = document.getElementById('liste-participants');
+    listeParticipants.innerHTML = membresBureau.map(m => {
+      const aVote = identifiantsAyantVote.includes(m.identifiant);
+      const style = aVote
+        ? 'text-decoration:line-through;color:var(--texte-att);background:rgba(255,255,255,0.04);'
+        : 'color:var(--texte);background:rgba(80,200,150,0.12);border:1px solid var(--menthe);';
+      return `<span style="${style}padding:0.35rem 0.7rem;border-radius:8px;font-family:var(--police-donnee);font-size:0.8rem;display:inline-block;">${m.prenom} ${m.nom}</span>`;
+    }).join('');
     const grille = document.getElementById('grille-affiches');
     grille.innerHTML = "";
 
