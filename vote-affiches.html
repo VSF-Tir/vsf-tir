@@ -70,6 +70,7 @@
 <div class="conteneur-vote">
 <h2 style="color:var(--menthe);">🗳️ Vote des affiches</h2>
 <p style="color:var(--texte-att);font-size:0.9rem;margin-top:-0.6rem;">Clique sur une image pour l'agrandir, ou sur "Voter" pour choisir. Un seul vote par personne — revoter ailleurs annule ton vote précédent.</p>
+<p id="compteur-votes" style="color:var(--or);font-weight:700;font-family:var(--police-donnee);"></p>
 
 <div class="grille-affiches" id="grille-affiches"></div>
 </div>
@@ -114,7 +115,12 @@
     dessinerGrille();
   }
 
-  function dessinerGrille() {
+function dessinerGrille() {
+    const totalVotes = votes.length;
+    const totalMembres = membresBureau.length;
+    document.getElementById('compteur-votes').textContent =
+      `${totalVotes} / ${totalMembres} personne${totalMembres > 1 ? 's' : ''} ont voté`;
+
     const grille = document.getElementById('grille-affiches');
     grille.innerHTML = "";
 
@@ -221,8 +227,8 @@
     }
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
-    chargerMembresBureau();
+document.addEventListener('DOMContentLoaded', async () => {
+    await chargerMembresBureau();
     chargerVotes();
   });
 </script>
