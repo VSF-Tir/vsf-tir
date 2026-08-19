@@ -297,7 +297,7 @@ if (assigne && assigne.identifiant === 'FERME') {
           `<div class="nom-assigne" style="color:#fff;background:#8e0000;">🔒 Fermé</div>`;
       } else {
         const evenements = (assigne && assigne.evenements) ? assigne.evenements : [];
-        const aVert = evenements.includes('ESPACE_VERT');
+        const aVert = !!(assigne && (assigne.espace_vert_identifiant || evenements.includes('ESPACE_VERT')));
         const aReunion = evenements.includes('REUNION_BUREAU');
         const aAG = evenements.includes('AG');
         const aArmes = evenements.includes('ENTRETIEN_ARMES');
@@ -322,7 +322,7 @@ if (assigne && assigne.identifiant === 'FERME') {
             `<div class="nom-assigne" style="color:${couleur};background:${couleur}33;">${assigne.prenom} ${assigne.nom}</div>`;
         } else if (couleursActives.length > 0) {
           const libelles = [];
-          if (aVert) libelles.push('🌳 Espace vert');
+          if (aVert) libelles.push('🌳 Espace vert' + (assigne.espace_vert_prenom ? ' (' + assigne.espace_vert_prenom + ')' : ''));
           if (aReunion) libelles.push('🗂️ Réunion');
           if (aAG) libelles.push('📋 AG');
           if (aArmes) libelles.push('🛠️ Entretien armes');
@@ -348,7 +348,7 @@ if (assigne && assigne.identifiant === 'FERME') {
         }
       }
 
-      const estOccupe = assigne && (assigne.identifiant === 'FERME' || assigne.identifiant || (assigne.evenements && assigne.evenements.length > 0));
+      const estOccupe = assigne && (assigne.identifiant === 'FERME' || assigne.identifiant || assigne.espace_vert_identifiant || (assigne.evenements && assigne.evenements.length > 0));
       case_.onclick = (evt) => {
         if (estOccupe) {
           ouvrirDetailJour(evt, dateStr, assigne, case_);
@@ -378,7 +378,7 @@ if (assigne && assigne.identifiant === 'FERME') {
     const evenements = assigne.evenements || [];
     const aMembre = assigne.identifiant && assigne.identifiant !== 'FERME';
     const aFerme = assigne.identifiant === 'FERME';
-    const aVert = evenements.includes('ESPACE_VERT');
+    const aVert = !!(assigne.espace_vert_identifiant || evenements.includes('ESPACE_VERT'));
     const aReunion = evenements.includes('REUNION_BUREAU');
     const aAG = evenements.includes('AG');
     const aArmes = evenements.includes('ENTRETIEN_ARMES');
@@ -387,6 +387,14 @@ if (assigne && assigne.identifiant === 'FERME') {
     const ouvrirEdition = () => {
       fermerDetail();
       ouvrirMenuJour({ stopPropagation(){} }, dateStr, caseElement);
+    };
+    const ouvrirVert = () => {
+      fermerDetail();
+      ouvrirSousMenuEspaceVert(dateStr, caseElement);
+    };
+    const toggleDepuisDetail = (tag) => {
+      fermerDetail();
+      toggleEvenement(dateStr, tag);
     };
 
     const carte = document.getElementById('carte-detail');
@@ -398,7 +406,7 @@ if (assigne && assigne.identifiant === 'FERME') {
 
     if (aFerme) carte.appendChild(ligneStatut('🔒', 'Fermé'));
     if (aMembre) carte.appendChild(ligneStatut('👤', 'Permanence : ' + assigne.prenom + ' ' + assigne.nom));
-    if (aVert) carte.appendChild(ligneStatut('🌳', 'Espace vert'));
+    if (aVert) carte.appendChild(ligneStatut('🌳', 'Espace vert' + (assigne.espace_vert_prenom ? ' : ' + assigne.espace_vert_prenom + ' ' + assigne.espace_vert_nom : '')));
     if (aReunion) carte.appendChild(ligneStatut('🗂️', 'Réunion de bureau'));
     if (aAG) carte.appendChild(ligneStatut('📋', 'Assemblée générale'));
     if (aArmes) carte.appendChild(ligneStatut('🛠️', 'Entretien des armes'));
@@ -407,13 +415,15 @@ if (assigne && assigne.identifiant === 'FERME') {
     actions.className = 'actions-detail';
 
     if (aFerme) {
-      if (estAdmin) actions.appendChild(boutonDetail('🔓 Rouvrir / modifier', ouvrirEdition));
+      if (estAdmin) actions.appendChild(boutonDetail('🔓 Rouvrir ce jour', () => reouvrirJour(dateStr)));
     } else {
-      if (aMembre) actions.appendChild(boutonDetail('✏️ Modifier la permanence', ouvrirEdition));
-      if (aVert) actions.appendChild(boutonDetail('✏️ Modifier Espace vert', ouvrirEdition));
-      if (estAdmin && aReunion) actions.appendChild(boutonDetail('✏️ Modifier Réunion de bureau', ouvrirEdition));
-      if (estAdmin && aAG) actions.appendChild(boutonDetail('✏️ Modifier Assemblée générale', ouvrirEdition));
-      if (estAdmin && aArmes) actions.appendChild(boutonDetail('✏️ Modifier Entretien des armes', ouvrirEdition));
+      actions.appendChild(boutonDetail(aMembre ? '✏️ Modifier la permanence' : '➕ Attribuer une permanence', ouvrirEdition));
+      actions.appendChild(boutonDetail(aVert ? '✏️ Modifier Espace vert' : '➕ Attribuer Espace vert', ouvrirVert));
+      if (estAdmin) {
+        actions.appendChild(boutonDetail(aReunion ? '🗑️ Retirer Réunion de bureau' : '➕ Ajouter Réunion de bureau', () => toggleDepuisDetail('REUNION_BUREAU')));
+        actions.appendChild(boutonDetail(aAG ? '🗑️ Retirer Assemblée générale' : '➕ Ajouter Assemblée générale', () => toggleDepuisDetail('AG')));
+        actions.appendChild(boutonDetail(aArmes ? '🗑️ Retirer Entretien des armes' : '➕ Ajouter Entretien des armes', () => toggleDepuisDetail('ENTRETIEN_ARMES')));
+      }
     }
 
     actions.appendChild(boutonDetail('← Retour', fermerDetail, 'retour'));
@@ -433,7 +443,12 @@ if (assigne && assigne.identifiant === 'FERME') {
     const btn = document.createElement('button');
     btn.className = 'btn-detail' + (classeSup ? ' ' + classeSup : '');
     btn.textContent = texte;
-    btn.onclick = onclick;
+    // Empêche le clic de remonter jusqu'au gestionnaire général qui ferme
+    // immédiatement le menu venant d'être ouvert depuis la fiche du jour.
+    btn.onclick = (evt) => {
+      evt.stopPropagation();
+      onclick(evt);
+    };
     return btn;
   }
 
@@ -468,19 +483,25 @@ const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
 
     const actuel = permanencesDuMois[dateStr];
     const evenementsActuels = (actuel && actuel.evenements) ? actuel.evenements : [];
+
+    const separateurVert = document.createElement('div');
+    separateurVert.className = 'separateur';
+    menu.appendChild(separateurVert);
+
+    const itemVert = document.createElement('div');
+    itemVert.className = 'item-menu';
+    const vertActuel = actuel && actuel.espace_vert_identifiant;
+    itemVert.innerHTML = `<span class="pastille-menu" style="background:#2ecc71;"></span>🌳 Espace vert` +
+      (vertActuel ? ` — ${actuel.espace_vert_prenom}` : '');
+    itemVert.onclick = () => ouvrirSousMenuEspaceVert(dateStr, caseElement);
+    menu.appendChild(itemVert);
+
     const definitionsEvenements = [
-      { tag: 'ESPACE_VERT', label: 'Espace vert', icone: '🌳', couleur: '#2ecc71', adminSeul: false },
       { tag: 'REUNION_BUREAU', label: 'Réunion de bureau', icone: '🗂️', couleur: '#e67e22', adminSeul: true },
       { tag: 'AG', label: 'Assemblée générale', icone: '📋', couleur: '#f1c40f', adminSeul: true },
       { tag: 'ENTRETIEN_ARMES', label: 'Entretien des armes', icone: '🛠️', couleur: '#3498db', adminSeul: true }
     ];
     const definitionsVisibles = definitionsEvenements.filter(ev => estAdmin || !ev.adminSeul);
-
-    if (definitionsVisibles.length > 0) {
-      const separateurEvenements = document.createElement('div');
-      separateurEvenements.className = 'separateur';
-      menu.appendChild(separateurEvenements);
-    }
 
     definitionsVisibles.forEach(ev => {
       const actif = evenementsActuels.includes(ev.tag);
@@ -538,7 +559,109 @@ const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
     menu.style.top = top + "px";
   }
 
-async function assignerPermanence(dateStr, membre) {
+function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
+    const menu = document.getElementById('menu-perma');
+    menu.innerHTML = "";
+    const actuel = permanencesDuMois[dateStr];
+    const vertActuel = actuel && actuel.espace_vert_identifiant;
+    const vertPresent = actuel && (actuel.espace_vert_identifiant || (actuel.evenements && actuel.evenements.includes('ESPACE_VERT')));
+
+    if (membresBureau.length === 0) {
+      menu.innerHTML = `<div class="item-menu" style="color:var(--texte-att);cursor:default;">Aucun membre du bureau</div>`;
+    } else {
+      membresBureau.forEach(m => {
+        const actif = vertActuel === m.identifiant;
+        const item = document.createElement('div');
+        item.className = 'item-menu';
+        item.innerHTML = `<span class="pastille-menu" style="background:#2ecc71;"></span>${actif ? '✓ ' : ''}${m.prenom} ${m.nom}`;
+        item.onclick = () => assignerEspaceVert(dateStr, m);
+        menu.appendChild(item);
+      });
+    }
+
+    // Tous les membres du bureau autorisés à accéder au planning peuvent
+    // attribuer, modifier ou retirer la personne chargée de l'espace vert.
+    if (vertPresent) {
+      const sep = document.createElement('div');
+      sep.className = 'separateur';
+      menu.appendChild(sep);
+      const itemRetirer = document.createElement('div');
+      itemRetirer.className = 'item-menu item-supprimer';
+      itemRetirer.textContent = '🗑️ Retirer Espace vert';
+      itemRetirer.onclick = () => retirerEspaceVert(dateStr);
+      menu.appendChild(itemRetirer);
+    }
+
+    const sep2 = document.createElement('div');
+    sep2.className = 'separateur';
+    menu.appendChild(sep2);
+    const itemRetour = document.createElement('div');
+    itemRetour.className = 'item-menu item-annuler';
+    itemRetour.textContent = '← Retour';
+    itemRetour.onclick = () => ouvrirMenuJour({ stopPropagation(){} }, dateStr, caseElement);
+    menu.appendChild(itemRetour);
+
+    // Ce sous-menu peut être ouvert directement depuis la fiche de détail :
+    // il faut alors l'afficher et le positionner, car aucun menu parent n'est
+    // encore visible.
+    menu.style.display = "block";
+    const menuRect = menu.getBoundingClientRect();
+    const rect = caseElement.getBoundingClientRect();
+
+    let left = window.scrollX + rect.left;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - menuRect.width - 10;
+    if (left > maxLeft) left = Math.max(window.scrollX + 10, maxLeft);
+
+    let top = window.scrollY + rect.bottom + 6;
+    const maxTop = window.scrollY + document.documentElement.clientHeight - menuRect.height - 10;
+    if (top > maxTop) {
+      top = window.scrollY + rect.top - menuRect.height - 6;
+      if (top < window.scrollY + 10) top = window.scrollY + 10;
+    }
+
+    menu.style.left = left + "px";
+    menu.style.top = top + "px";
+  }
+
+  async function assignerEspaceVert(dateStr, membre) {
+    const actuel = permanencesDuMois[dateStr];
+    const { error } = await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
+      nom: (actuel && actuel.nom) ? actuel.nom : null,
+      prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
+      evenements: (actuel && actuel.evenements) ? actuel.evenements.filter(e => e !== 'ESPACE_VERT') : [],
+      espace_vert_identifiant: membre.identifiant,
+      espace_vert_nom: membre.nom,
+      espace_vert_prenom: membre.prenom,
+      updated_at: new Date().toISOString()
+    });
+    if (error) { console.error('assignerEspaceVert:', error); alert("Erreur lors de l'attribution : " + error.message); return; }
+    notifierSiBesoin(dateStr, "attribue", "Espace vert — " + membre.prenom + " " + membre.nom);
+    fermerMenu();
+    chargerMois();
+  }
+
+  async function retirerEspaceVert(dateStr) {
+    const actuel = permanencesDuMois[dateStr];
+    const { error } = await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
+      nom: (actuel && actuel.nom) ? actuel.nom : null,
+      prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
+      evenements: (actuel && actuel.evenements) ? actuel.evenements.filter(e => e !== 'ESPACE_VERT') : [],
+      espace_vert_identifiant: null,
+      espace_vert_nom: null,
+      espace_vert_prenom: null,
+      updated_at: new Date().toISOString()
+    });
+    if (error) { console.error('retirerEspaceVert:', error); alert("Erreur lors du retrait : " + error.message); return; }
+    notifierSiBesoin(dateStr, "supprime", "Espace vert");
+    fermerMenu();
+    chargerMois();
+  }
+
+  async function assignerPermanence(dateStr, membre) {
     const ancien = permanencesDuMois[dateStr];
     const ancienNom = (ancien && ancien.identifiant !== 'FERME' && ancien.identifiant !== membre.identifiant)
       ? (ancien.prenom + " " + ancien.nom) : null;
@@ -564,14 +687,15 @@ async function assignerPermanence(dateStr, membre) {
       ? evenementsActuels.filter(e => e !== tag)
       : [...evenementsActuels, tag];
 
-    await sb.from('permanences').upsert({
+    const { error } = await sb.from('permanences').upsert({
       date: dateStr,
-      identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : '',
-      nom: (actuel && actuel.nom) ? actuel.nom : '',
-      prenom: (actuel && actuel.prenom) ? actuel.prenom : '',
+      identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
+      nom: (actuel && actuel.nom) ? actuel.nom : null,
+      prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
       evenements: nouveauxEvenements,
       updated_at: new Date().toISOString()
     });
+    if (error) { console.error('toggleEvenement:', error); alert("Erreur : " + error.message); return; }
     notifierSiBesoin(dateStr, dejaPresent ? "supprime" : "attribue", LIBELLES_EVENEMENTS[tag] || tag);
     fermerMenu();
     chargerMois();
@@ -586,6 +710,24 @@ async function assignerPermanence(dateStr, membre) {
       updated_at: new Date().toISOString()
     });
     fermerMenu();
+    chargerMois();
+  }
+
+  async function reouvrirJour(dateStr) {
+    const actuel = permanencesDuMois[dateStr];
+    const { error } = await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: null,
+      nom: null,
+      prenom: null,
+      evenements: (actuel && actuel.evenements) ? actuel.evenements : [],
+      espace_vert_identifiant: (actuel && actuel.espace_vert_identifiant) ? actuel.espace_vert_identifiant : null,
+      espace_vert_nom: (actuel && actuel.espace_vert_nom) ? actuel.espace_vert_nom : null,
+      espace_vert_prenom: (actuel && actuel.espace_vert_prenom) ? actuel.espace_vert_prenom : null,
+      updated_at: new Date().toISOString()
+    });
+    if (error) { console.error('reouvrirJour:', error); alert("Erreur : " + error.message); return; }
+    fermerDetail();
     chargerMois();
   }
 
@@ -637,8 +779,8 @@ function notifierSiBesoin(dateStr, action, cible, ancien) {
   if (!sessionData || !(ADMIN_IDS.includes(sessionData.identifiant) || sessionData.membre_bureau)) {
     window.location.href = 'reservation.html';
   } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      chargerMembresBureau();
+    document.addEventListener('DOMContentLoaded', async () => {
+      await chargerMembresBureau();
       chargerMois();
     });
   }
