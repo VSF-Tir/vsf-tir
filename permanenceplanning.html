@@ -116,7 +116,9 @@
 <script>
   const SUPABASE_URL = "https://xndpmjuzdqwexnligrwh.supabase.co";
   const SUPABASE_KEY = "sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    global: { fetch: (url, options) => fetch(url, { ...options, cache: 'no-store' }) }
+  });
 
   const NOMS_MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
   const NOMS_JOURS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
@@ -265,37 +267,46 @@ if (assigne && assigne.identifiant === 'FERME') {
         const aVert = evenements.includes('ESPACE_VERT');
         const aReunion = evenements.includes('REUNION_BUREAU');
         const aAG = evenements.includes('AG');
-        const aOrange = aReunion || aAG;
+        const aArmes = evenements.includes('ENTRETIEN_ARMES');
         const aMembre = assigne && assigne.identifiant && assigne.identifiant !== 'FERME';
+
+        const couleursActives = [];
+        if (aVert) couleursActives.push('#2ecc71');
+        if (aReunion) couleursActives.push('#e67e22');
+        if (aAG) couleursActives.push('#f1c40f');
+        if (aArmes) couleursActives.push('#3498db');
 
         if (aMembre) {
           const couleur = couleurMembre(assigne.identifiant);
           case_.style.borderColor = couleur;
           case_.style.background = couleur + "1A";
           let pastilles = '';
-          if (aVert) pastilles += `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ecc71;margin-right:3px;"></span>`;
-          if (aOrange) pastilles += `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e67e22;"></span>`;
+          couleursActives.forEach(c => {
+            pastilles += `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:3px;"></span>`;
+          });
           case_.innerHTML = `<div class="numero">${jour}</div>` +
             (pastilles ? `<div style="display:flex;">${pastilles}</div>` : '') +
             `<div class="nom-assigne" style="color:${couleur};background:${couleur}33;">${assigne.prenom} ${assigne.nom}</div>`;
-        } else if (aVert || aOrange) {
+        } else if (couleursActives.length > 0) {
           const libelles = [];
           if (aVert) libelles.push('🌳 Espace vert');
           if (aReunion) libelles.push('🗂️ Réunion');
           if (aAG) libelles.push('📋 AG');
+          if (aArmes) libelles.push('🛠️ Entretien armes');
           const texte = libelles.join(' + ');
-          let fond, bord;
-          if (aVert && aOrange) {
-            fond = 'linear-gradient(135deg, #2ecc71 50%, #e67e22 50%)';
-            bord = '#e67e22';
-          } else if (aVert) {
-            fond = '#2ecc7133';
-            bord = '#2ecc71';
+          let fond;
+          if (couleursActives.length === 1) {
+            fond = couleursActives[0] + '33';
           } else {
-            fond = '#e67e2233';
-            bord = '#e67e22';
+            const n = couleursActives.length;
+            const segments = couleursActives.map((c, i) => {
+              const debut = (i / n * 100).toFixed(2);
+              const fin = ((i + 1) / n * 100).toFixed(2);
+              return `${c} ${debut}%, ${c} ${fin}%`;
+            }).join(', ');
+            fond = `linear-gradient(135deg, ${segments})`;
           }
-          case_.style.borderColor = bord;
+          case_.style.borderColor = couleursActives[couleursActives.length - 1];
           case_.style.background = fond;
           case_.innerHTML = `<div class="numero">${jour}</div>` +
             `<div class="nom-assigne" style="color:#fff;background:rgba(0,0,0,0.35);">${texte}</div>`;
@@ -339,18 +350,25 @@ if (assigne && assigne.identifiant === 'FERME') {
       });
     }
 
-const separateurEvenements = document.createElement('div');
-    separateurEvenements.className = 'separateur';
-    menu.appendChild(separateurEvenements);
+const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
 
     const actuel = permanencesDuMois[dateStr];
     const evenementsActuels = (actuel && actuel.evenements) ? actuel.evenements : [];
     const definitionsEvenements = [
-      { tag: 'ESPACE_VERT', label: 'Espace vert', icone: '🌳', couleur: '#2ecc71' },
-      { tag: 'REUNION_BUREAU', label: 'Réunion de bureau', icone: '🗂️', couleur: '#e67e22' },
-      { tag: 'AG', label: 'Assemblée générale', icone: '📋', couleur: '#e67e22' }
+      { tag: 'ESPACE_VERT', label: 'Espace vert', icone: '🌳', couleur: '#2ecc71', adminSeul: false },
+      { tag: 'REUNION_BUREAU', label: 'Réunion de bureau', icone: '🗂️', couleur: '#e67e22', adminSeul: true },
+      { tag: 'AG', label: 'Assemblée générale', icone: '📋', couleur: '#f1c40f', adminSeul: true },
+      { tag: 'ENTRETIEN_ARMES', label: 'Entretien des armes', icone: '🛠️', couleur: '#3498db', adminSeul: true }
     ];
-    definitionsEvenements.forEach(ev => {
+    const definitionsVisibles = definitionsEvenements.filter(ev => estAdmin || !ev.adminSeul);
+
+    if (definitionsVisibles.length > 0) {
+      const separateurEvenements = document.createElement('div');
+      separateurEvenements.className = 'separateur';
+      menu.appendChild(separateurEvenements);
+    }
+
+    definitionsVisibles.forEach(ev => {
       const actif = evenementsActuels.includes(ev.tag);
       const itemEv = document.createElement('div');
       itemEv.className = 'item-menu';
@@ -359,11 +377,13 @@ const separateurEvenements = document.createElement('div');
       menu.appendChild(itemEv);
     });
 
-const itemFerme = document.createElement('div');
-    itemFerme.className = 'item-menu';
-    itemFerme.innerHTML = `<span class="pastille-menu" style="background:#e74c3c;"></span>🔒 Fermé`;
-    itemFerme.onclick = () => assignerFerme(dateStr);
-    menu.appendChild(itemFerme);
+    if (estAdmin) {
+      const itemFerme = document.createElement('div');
+      itemFerme.className = 'item-menu';
+      itemFerme.innerHTML = `<span class="pastille-menu" style="background:#e74c3c;"></span>🔒 Fermé`;
+      itemFerme.onclick = () => assignerFerme(dateStr);
+      menu.appendChild(itemFerme);
+    }
 
     const separateur = document.createElement('div');
     separateur.className = 'separateur';
@@ -422,7 +442,7 @@ async function assignerPermanence(dateStr, membre) {
   }
 
   async function toggleEvenement(dateStr, tag) {
-    const LIBELLES_EVENEMENTS = { ESPACE_VERT: 'Espace vert', REUNION_BUREAU: 'Réunion de bureau', AG: 'Assemblée générale' };
+    const LIBELLES_EVENEMENTS = { ESPACE_VERT: 'Espace vert', REUNION_BUREAU: 'Réunion de bureau', AG: 'Assemblée générale', ENTRETIEN_ARMES: 'Entretien des armes' };
     const actuel = permanencesDuMois[dateStr];
     const evenementsActuels = (actuel && actuel.evenements) ? actuel.evenements : [];
     const dejaPresent = evenementsActuels.includes(tag);
