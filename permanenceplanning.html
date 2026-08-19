@@ -35,14 +35,14 @@
     aspect-ratio: 1; background: var(--fond-carte); border-radius: 10px; padding: 0.5rem;
     cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;
     border: 1px solid transparent; transition: border-color 0.15s ease, background 0.15s ease;
-    min-width: 0; overflow: hidden;
+    min-width: 0; min-height: 0;
   }
   .case-jour.vide { background: transparent; cursor: default; }
   .case-jour:not(.vide):hover { border-color: var(--or); }
   .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
   .case-jour .nom-assigne {
     font-family: var(--police-donnee); font-size: 0.7rem; font-weight: 600; border-radius: 6px; padding: 2px 5px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    overflow-wrap: break-word; white-space: normal; line-height: 1.2;
   }
 
   /* Menu déroulant flottant (assignation + sélecteur de couleur) */
@@ -59,6 +59,31 @@
   .menu-perma .item-supprimer { color: #ff8a75; }
   .menu-perma .item-annuler { color: var(--texte-att); }
 
+  /* Fenêtre détail (clic sur un jour déjà occupé) */
+  .fond-detail {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+    z-index: 70; align-items: center; justify-content: center; padding: 20px;
+  }
+  .fond-detail.ouvert { display: flex; }
+  .carte-detail {
+    background: var(--fond-carte); border: 1px solid var(--or); border-radius: 14px;
+    padding: 1.4rem; max-width: 380px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .carte-detail h3 { color: var(--menthe); margin: 0 0 1rem; text-transform: capitalize; font-size: 1.1rem; }
+  .carte-detail .ligne-statut {
+    display: flex; align-items: center; gap: 8px; padding: 9px 2px; font-size: 0.95rem;
+    color: var(--texte); border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .carte-detail .ligne-statut:last-of-type { border-bottom: none; }
+  .actions-detail { display: flex; flex-direction: column; gap: 8px; margin-top: 1.3rem; }
+  .btn-detail {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: var(--texte);
+    border-radius: 8px; padding: 0.6rem 0.9rem; cursor: pointer; font-family: var(--police-donnee);
+    font-size: 0.9rem; display: flex; align-items: center; gap: 8px; text-align: left;
+  }
+  .btn-detail:hover { background: rgba(217,154,61,0.15); border-color: var(--or); }
+  .btn-detail.retour { color: var(--texte-att); }
+
   /* ===== Version mobile ===== */
   @media (max-width: 600px) {
     .conteneur-perma { padding: 1rem 0.7rem 3rem; }
@@ -70,12 +95,16 @@
     .grille-calendrier { gap: 3px; }
     .entete-jour-semaine { font-size: 0.6rem; padding-bottom: 2px; }
 .case-jour {
-      aspect-ratio: unset; align-self: start; height: 52px;
+      aspect-ratio: unset; align-self: start; min-height: 52px;
       padding: 0.25rem; border-radius: 6px; justify-content: center; gap: 2px;
     }
     .case-jour .numero { font-size: 0.75rem; }
     .case-jour .nom-assigne { font-size: 0.55rem; padding: 1px 3px; line-height: 1.3; }
     .legende-membres { gap: 0.4rem 0.7rem; font-size: 0.72rem; margin-bottom: 1rem; }
+    .carte-detail { padding: 1.1rem; }
+    .carte-detail h3 { font-size: 1rem; }
+    .ligne-statut { font-size: 0.85rem; padding: 8px 2px; }
+    .btn-detail { font-size: 0.85rem; padding: 0.8rem 0.9rem; }
   }
 </style>
 </head>
@@ -103,6 +132,10 @@
 </div>
 
 <div class="menu-perma" id="menu-perma"></div>
+
+<div class="fond-detail" id="fond-detail">
+<div class="carte-detail" id="carte-detail"></div>
+</div>
 
 <footer class="pied">
 <div class="pied-conteneur">
@@ -315,7 +348,14 @@ if (assigne && assigne.identifiant === 'FERME') {
         }
       }
 
-      case_.onclick = (evt) => ouvrirMenuJour(evt, dateStr, case_);
+      const estOccupe = assigne && (assigne.identifiant === 'FERME' || assigne.identifiant || (assigne.evenements && assigne.evenements.length > 0));
+      case_.onclick = (evt) => {
+        if (estOccupe) {
+          ouvrirDetailJour(evt, dateStr, assigne, case_);
+        } else {
+          ouvrirMenuJour(evt, dateStr, case_);
+        }
+      };
       grille.appendChild(case_);
     }
   }
@@ -323,6 +363,80 @@ if (assigne && assigne.identifiant === 'FERME') {
   // ============================================================
   // Menu déroulant flottant (liste des membres + Supprimer / Annuler)
   // ============================================================
+  const NOMS_JOURS_LONG = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+
+  function fermerDetail() {
+    document.getElementById('fond-detail').classList.remove('ouvert');
+  }
+
+  function ouvrirDetailJour(evt, dateStr, assigne, caseElement) {
+    evt.stopPropagation();
+
+    const dateObj = new Date(dateStr + 'T00:00:00');
+    const titre = `${NOMS_JOURS_LONG[dateObj.getDay()]} ${dateObj.getDate()} ${NOMS_MOIS[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+
+    const evenements = assigne.evenements || [];
+    const aMembre = assigne.identifiant && assigne.identifiant !== 'FERME';
+    const aFerme = assigne.identifiant === 'FERME';
+    const aVert = evenements.includes('ESPACE_VERT');
+    const aReunion = evenements.includes('REUNION_BUREAU');
+    const aAG = evenements.includes('AG');
+    const aArmes = evenements.includes('ENTRETIEN_ARMES');
+    const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
+
+    const ouvrirEdition = () => {
+      fermerDetail();
+      ouvrirMenuJour({ stopPropagation(){} }, dateStr, caseElement);
+    };
+
+    const carte = document.getElementById('carte-detail');
+    carte.innerHTML = "";
+
+    const h3 = document.createElement('h3');
+    h3.textContent = titre;
+    carte.appendChild(h3);
+
+    if (aFerme) carte.appendChild(ligneStatut('🔒', 'Fermé'));
+    if (aMembre) carte.appendChild(ligneStatut('👤', 'Permanence : ' + assigne.prenom + ' ' + assigne.nom));
+    if (aVert) carte.appendChild(ligneStatut('🌳', 'Espace vert'));
+    if (aReunion) carte.appendChild(ligneStatut('🗂️', 'Réunion de bureau'));
+    if (aAG) carte.appendChild(ligneStatut('📋', 'Assemblée générale'));
+    if (aArmes) carte.appendChild(ligneStatut('🛠️', 'Entretien des armes'));
+
+    const actions = document.createElement('div');
+    actions.className = 'actions-detail';
+
+    if (aFerme) {
+      if (estAdmin) actions.appendChild(boutonDetail('🔓 Rouvrir / modifier', ouvrirEdition));
+    } else {
+      if (aMembre) actions.appendChild(boutonDetail('✏️ Modifier la permanence', ouvrirEdition));
+      if (aVert) actions.appendChild(boutonDetail('✏️ Modifier Espace vert', ouvrirEdition));
+      if (estAdmin && aReunion) actions.appendChild(boutonDetail('✏️ Modifier Réunion de bureau', ouvrirEdition));
+      if (estAdmin && aAG) actions.appendChild(boutonDetail('✏️ Modifier Assemblée générale', ouvrirEdition));
+      if (estAdmin && aArmes) actions.appendChild(boutonDetail('✏️ Modifier Entretien des armes', ouvrirEdition));
+    }
+
+    actions.appendChild(boutonDetail('← Retour', fermerDetail, 'retour'));
+    carte.appendChild(actions);
+
+    document.getElementById('fond-detail').classList.add('ouvert');
+  }
+
+  function ligneStatut(icone, texte) {
+    const div = document.createElement('div');
+    div.className = 'ligne-statut';
+    div.textContent = icone + ' ' + texte;
+    return div;
+  }
+
+  function boutonDetail(texte, onclick, classeSup) {
+    const btn = document.createElement('button');
+    btn.className = 'btn-detail' + (classeSup ? ' ' + classeSup : '');
+    btn.textContent = texte;
+    btn.onclick = onclick;
+    return btn;
+  }
+
   function fermerMenu() {
     document.getElementById('menu-perma').style.display = 'none';
   }
@@ -502,6 +616,10 @@ function notifierSiBesoin(dateStr, action, cible, ancien) {
       })
     }).catch(() => {}); // ne bloque jamais l'interface si l'envoi échoue
   }
+
+  document.getElementById('fond-detail').addEventListener('click', (evt) => {
+    if (evt.target.id === 'fond-detail') fermerDetail();
+  });
 
   document.addEventListener('click', (evt) => {
     const menu = document.getElementById('menu-perma');
