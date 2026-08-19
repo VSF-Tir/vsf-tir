@@ -35,14 +35,14 @@
     aspect-ratio: 1; background: var(--fond-carte); border-radius: 10px; padding: 0.5rem;
     cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;
     border: 1px solid transparent; transition: border-color 0.15s ease, background 0.15s ease;
-    min-width: 0; min-height: 0;
+    min-width: 0; overflow: hidden;
   }
   .case-jour.vide { background: transparent; cursor: default; }
   .case-jour:not(.vide):hover { border-color: var(--or); }
   .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
   .case-jour .nom-assigne {
     font-family: var(--police-donnee); font-size: 0.7rem; font-weight: 600; border-radius: 6px; padding: 2px 5px;
-    overflow-wrap: break-word; white-space: normal; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
   /* Menu déroulant flottant (assignation + sélecteur de couleur) */
@@ -95,7 +95,7 @@
     .grille-calendrier { gap: 3px; }
     .entete-jour-semaine { font-size: 0.6rem; padding-bottom: 2px; }
 .case-jour {
-      aspect-ratio: unset; align-self: start; min-height: 52px;
+      aspect-ratio: unset; align-self: start; height: 52px;
       padding: 0.25rem; border-radius: 6px; justify-content: center; gap: 2px;
     }
     .case-jour .numero { font-size: 0.75rem; }
@@ -322,11 +322,11 @@ if (assigne && assigne.identifiant === 'FERME') {
             `<div class="nom-assigne" style="color:${couleur};background:${couleur}33;">${assigne.prenom} ${assigne.nom}</div>`;
         } else if (couleursActives.length > 0) {
           const libelles = [];
-          if (aVert) libelles.push('🌳 Espace vert');
-          if (aReunion) libelles.push('🗂️ Réunion');
-          if (aAG) libelles.push('📋 AG');
-          if (aArmes) libelles.push('🛠️ Entretien armes');
-          const texte = libelles.join(' + ');
+          if (aVert) libelles.push('🌳');
+          if (aReunion) libelles.push('🗂️');
+          if (aAG) libelles.push('📋');
+          if (aArmes) libelles.push('🛠️');
+          const texte = libelles.join(' ');
           let fond;
           if (couleursActives.length === 1) {
             fond = couleursActives[0] + '33';
