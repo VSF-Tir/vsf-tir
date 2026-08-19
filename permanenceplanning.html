@@ -417,9 +417,17 @@ if (assigne && assigne.identifiant === 'FERME') {
     if (aFerme) {
       if (estAdmin) actions.appendChild(boutonDetail('🔓 Rouvrir ce jour', () => reouvrirJour(dateStr)));
     } else {
-      actions.appendChild(boutonDetail(aMembre ? '✏️ Modifier la permanence' : '➕ Attribuer une permanence', ouvrirEdition));
-      actions.appendChild(boutonDetail(aVert ? '✏️ Modifier Espace vert' : '➕ Attribuer Espace vert', ouvrirVert));
+      // Un membre du bureau peut modifier une attribution existante, mais
+      // seuls Christophe et Serge peuvent en créer une nouvelle.
+      if (aMembre || estAdmin) {
+        actions.appendChild(boutonDetail(aMembre ? '✏️ Modifier la permanence' : '➕ Créer une permanence', ouvrirEdition));
+      }
+      if (aVert || estAdmin) {
+        actions.appendChild(boutonDetail(aVert ? '✏️ Modifier Espace vert' : '➕ Créer Espace vert', ouvrirVert));
+      }
       if (estAdmin) {
+        if (aMembre) actions.appendChild(boutonDetail('🗑️ Supprimer la permanence', () => retirerPermanence(dateStr)));
+        if (aVert) actions.appendChild(boutonDetail('🗑️ Supprimer Espace vert', () => retirerEspaceVert(dateStr)));
         actions.appendChild(boutonDetail(aReunion ? '🗑️ Retirer Réunion de bureau' : '➕ Ajouter Réunion de bureau', () => toggleDepuisDetail('REUNION_BUREAU')));
         actions.appendChild(boutonDetail(aAG ? '🗑️ Retirer Assemblée générale' : '➕ Ajouter Assemblée générale', () => toggleDepuisDetail('AG')));
         actions.appendChild(boutonDetail(aArmes ? '🗑️ Retirer Entretien des armes' : '➕ Ajouter Entretien des armes', () => toggleDepuisDetail('ENTRETIEN_ARMES')));
@@ -482,19 +490,29 @@ if (assigne && assigne.identifiant === 'FERME') {
 const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
 
     const actuel = permanencesDuMois[dateStr];
+    const permanencePresente = !!(actuel && actuel.identifiant && actuel.identifiant !== 'FERME');
     const evenementsActuels = (actuel && actuel.evenements) ? actuel.evenements : [];
+
+    // La liste des personnes sert soit à créer (admins), soit à modifier une
+    // permanence déjà créée (tous les membres du bureau).
+    if (!estAdmin && !permanencePresente) {
+      menu.innerHTML = `<div class="item-menu" style="color:var(--texte-att);cursor:default;">Création réservée aux administrateurs</div>`;
+    }
 
     const separateurVert = document.createElement('div');
     separateurVert.className = 'separateur';
     menu.appendChild(separateurVert);
 
-    const itemVert = document.createElement('div');
-    itemVert.className = 'item-menu';
     const vertActuel = actuel && actuel.espace_vert_identifiant;
-    itemVert.innerHTML = `<span class="pastille-menu" style="background:#2ecc71;"></span>🌳 Espace vert` +
-      (vertActuel ? ` — ${actuel.espace_vert_prenom}` : '');
-    itemVert.onclick = () => ouvrirSousMenuEspaceVert(dateStr, caseElement);
-    menu.appendChild(itemVert);
+    const vertPresent = !!(actuel && (actuel.espace_vert_identifiant || evenementsActuels.includes('ESPACE_VERT')));
+    if (estAdmin || vertPresent) {
+      const itemVert = document.createElement('div');
+      itemVert.className = 'item-menu';
+      itemVert.innerHTML = `<span class="pastille-menu" style="background:#2ecc71;"></span>🌳 Espace vert` +
+        (vertActuel ? ` — ${actuel.espace_vert_prenom}` : '');
+      itemVert.onclick = () => ouvrirSousMenuEspaceVert(dateStr, caseElement);
+      menu.appendChild(itemVert);
+    }
 
     const definitionsEvenements = [
       { tag: 'REUNION_BUREAU', label: 'Réunion de bureau', icone: '🗂️', couleur: '#e67e22', adminSeul: true },
@@ -524,11 +542,13 @@ const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
     separateur.className = 'separateur';
     menu.appendChild(separateur);
 
-    const itemSupprimer = document.createElement('div');
-    itemSupprimer.className = 'item-menu item-supprimer';
-    itemSupprimer.textContent = '🗑️ Supprimer';
-    itemSupprimer.onclick = () => supprimerPermanence(dateStr);
-    menu.appendChild(itemSupprimer);
+    if (estAdmin && permanencePresente) {
+      const itemSupprimer = document.createElement('div');
+      itemSupprimer.className = 'item-menu item-supprimer';
+      itemSupprimer.textContent = '🗑️ Supprimer la permanence';
+      itemSupprimer.onclick = () => retirerPermanence(dateStr);
+      menu.appendChild(itemSupprimer);
+    }
 
     const itemAnnuler = document.createElement('div');
     itemAnnuler.className = 'item-menu item-annuler';
@@ -565,6 +585,7 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     const actuel = permanencesDuMois[dateStr];
     const vertActuel = actuel && actuel.espace_vert_identifiant;
     const vertPresent = actuel && (actuel.espace_vert_identifiant || (actuel.evenements && actuel.evenements.includes('ESPACE_VERT')));
+    const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
 
     if (membresBureau.length === 0) {
       menu.innerHTML = `<div class="item-menu" style="color:var(--texte-att);cursor:default;">Aucun membre du bureau</div>`;
@@ -579,9 +600,9 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
       });
     }
 
-    // Tous les membres du bureau autorisés à accéder au planning peuvent
-    // attribuer, modifier ou retirer la personne chargée de l'espace vert.
-    if (vertPresent) {
+    // Seuls les administrateurs peuvent supprimer Espace vert. Les autres
+    // membres peuvent uniquement changer la personne lorsqu'il existe déjà.
+    if (vertPresent && estAdmin) {
       const sep = document.createElement('div');
       sep.className = 'separateur';
       menu.appendChild(sep);
@@ -625,6 +646,14 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
 
   async function assignerEspaceVert(dateStr, membre) {
     const actuel = permanencesDuMois[dateStr];
+    const dejaCree = !!(actuel && (actuel.espace_vert_identifiant || (actuel.evenements && actuel.evenements.includes('ESPACE_VERT'))));
+    if (!dejaCree && !ADMIN_IDS.includes(sessionData.identifiant)) {
+      alert("Seuls Christophe et Serge peuvent créer Espace vert.");
+      return;
+    }
+    const ancienNom = dejaCree && actuel.espace_vert_identifiant !== membre.identifiant
+      ? ((actuel.espace_vert_prenom || '') + " " + (actuel.espace_vert_nom || '')).trim()
+      : null;
     const { error } = await sb.from('permanences').upsert({
       date: dateStr,
       identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
@@ -637,12 +666,16 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
       updated_at: new Date().toISOString()
     });
     if (error) { console.error('assignerEspaceVert:', error); alert("Erreur lors de l'attribution : " + error.message); return; }
-    notifierSiBesoin(dateStr, "attribue", "Espace vert — " + membre.prenom + " " + membre.nom);
+    notifierSiBesoin(dateStr, "attribue", "Espace vert — " + membre.prenom + " " + membre.nom, ancienNom);
     fermerMenu();
     chargerMois();
   }
 
   async function retirerEspaceVert(dateStr) {
+    if (!ADMIN_IDS.includes(sessionData.identifiant)) {
+      alert("Seuls Christophe et Serge peuvent supprimer Espace vert.");
+      return;
+    }
     const actuel = permanencesDuMois[dateStr];
     const { error } = await sb.from('permanences').upsert({
       date: dateStr,
@@ -658,11 +691,17 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     if (error) { console.error('retirerEspaceVert:', error); alert("Erreur lors du retrait : " + error.message); return; }
     notifierSiBesoin(dateStr, "supprime", "Espace vert");
     fermerMenu();
+    fermerDetail();
     chargerMois();
   }
 
   async function assignerPermanence(dateStr, membre) {
     const ancien = permanencesDuMois[dateStr];
+    const dejaCreee = !!(ancien && ancien.identifiant && ancien.identifiant !== 'FERME');
+    if (!dejaCreee && !ADMIN_IDS.includes(sessionData.identifiant)) {
+      alert("Seuls Christophe et Serge peuvent créer une permanence.");
+      return;
+    }
     const ancienNom = (ancien && ancien.identifiant !== 'FERME' && ancien.identifiant !== membre.identifiant)
       ? (ancien.prenom + " " + ancien.nom) : null;
 
@@ -731,10 +770,35 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     chargerMois();
   }
 
-async function supprimerPermanence(dateStr) {
-    await sb.from('permanences').delete().eq('date', dateStr);
-    notifierSiBesoin(dateStr, "supprime", null);
+async function retirerPermanence(dateStr) {
+    if (!ADMIN_IDS.includes(sessionData.identifiant)) {
+      alert("Seuls Christophe et Serge peuvent supprimer une permanence.");
+      return;
+    }
+    const actuel = permanencesDuMois[dateStr];
+    if (!actuel) return;
+
+    const evenements = actuel.evenements || [];
+    const conserveAutreContenu = !!(actuel.espace_vert_identifiant || evenements.length > 0);
+    let error;
+    if (conserveAutreContenu) {
+      ({ error } = await sb.from('permanences').upsert({
+        date: dateStr,
+        identifiant: null,
+        nom: null,
+        prenom: null,
+        evenements,
+        espace_vert_identifiant: actuel.espace_vert_identifiant || null,
+        espace_vert_nom: actuel.espace_vert_nom || null,
+        espace_vert_prenom: actuel.espace_vert_prenom || null,
+        updated_at: new Date().toISOString()
+      }));
+    } else {
+      ({ error } = await sb.from('permanences').delete().eq('date', dateStr));
+    }
+    if (error) { console.error('retirerPermanence:', error); alert("Erreur lors de la suppression : " + error.message); return; }
     fermerMenu();
+    fermerDetail();
     chargerMois();
   }
 
