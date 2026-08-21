@@ -174,6 +174,37 @@
   let permanencesDuMois = {}; // { "2026-08-13": { identifiant, nom, prenom } }
   let membresBureau = [];
 
+  // La première personne Espace vert utilise les colonnes historiques.
+  // La seconde est conservée dans evenements afin de rester compatible avec
+  // la table Supabase existante, sans migration de base de données.
+  const PREFIXE_ESPACE_VERT_2 = 'ESPACE_VERT_2:';
+
+  function lireEspaceVert2(assigne) {
+    const evenements = (assigne && assigne.evenements) ? assigne.evenements : [];
+    const valeur = evenements.find(e => typeof e === 'string' && e.startsWith(PREFIXE_ESPACE_VERT_2));
+    if (!valeur) return null;
+    try {
+      return JSON.parse(decodeURIComponent(valeur.slice(PREFIXE_ESPACE_VERT_2.length)));
+    } catch (e) {
+      console.error('Espace vert personne 2 illisible :', e);
+      return null;
+    }
+  }
+
+  function ecrireEspaceVert2(evenements, membre) {
+    const autres = (evenements || []).filter(e =>
+      e !== 'ESPACE_VERT' && !(typeof e === 'string' && e.startsWith(PREFIXE_ESPACE_VERT_2))
+    );
+    if (membre) {
+      autres.push(PREFIXE_ESPACE_VERT_2 + encodeURIComponent(JSON.stringify({
+        identifiant: membre.identifiant,
+        nom: membre.nom,
+        prenom: membre.prenom
+      })));
+    }
+    return autres;
+  }
+
   function formaterISO(date) {
     // Ne jamais utiliser toISOString() ici (décalage UTC).
     const y = date.getFullYear();
@@ -297,7 +328,8 @@ if (assigne && assigne.identifiant === 'FERME') {
           `<div class="nom-assigne" style="color:#fff;background:#8e0000;">🔒 Fermé</div>`;
       } else {
         const evenements = (assigne && assigne.evenements) ? assigne.evenements : [];
-        const aVert = !!(assigne && (assigne.espace_vert_identifiant || evenements.includes('ESPACE_VERT')));
+        const vert2 = lireEspaceVert2(assigne);
+        const aVert = !!(assigne && (assigne.espace_vert_identifiant || vert2 || evenements.includes('ESPACE_VERT')));
         const aReunion = evenements.includes('REUNION_BUREAU');
         const aAG = evenements.includes('AG');
         const aArmes = evenements.includes('ENTRETIEN_ARMES');
@@ -322,7 +354,12 @@ if (assigne && assigne.identifiant === 'FERME') {
             `<div class="nom-assigne" style="color:${couleur};background:${couleur}33;">${assigne.prenom} ${assigne.nom}</div>`;
         } else if (couleursActives.length > 0) {
           const libelles = [];
-          if (aVert) libelles.push('🌳 Espace vert' + (assigne.espace_vert_prenom ? ' (' + assigne.espace_vert_prenom + ')' : ''));
+          if (aVert) {
+            const prenomsVert = [];
+            if (assigne.espace_vert_prenom) prenomsVert.push(assigne.espace_vert_prenom);
+            if (vert2 && vert2.prenom) prenomsVert.push(vert2.prenom);
+            libelles.push('🌳 Espace vert' + (prenomsVert.length ? ' (' + prenomsVert.join(' + ') + ')' : ''));
+          }
           if (aReunion) libelles.push('🗂️ Réunion');
           if (aAG) libelles.push('📋 AG');
           if (aArmes) libelles.push('🛠️ Entretien armes');
@@ -348,7 +385,7 @@ if (assigne && assigne.identifiant === 'FERME') {
         }
       }
 
-      const estOccupe = assigne && (assigne.identifiant === 'FERME' || assigne.identifiant || assigne.espace_vert_identifiant || (assigne.evenements && assigne.evenements.length > 0));
+      const estOccupe = assigne && (assigne.identifiant === 'FERME' || assigne.identifiant || assigne.espace_vert_identifiant || lireEspaceVert2(assigne) || (assigne.evenements && assigne.evenements.length > 0));
       case_.onclick = (evt) => {
         if (estOccupe) {
           ouvrirDetailJour(evt, dateStr, assigne, case_);
@@ -378,7 +415,8 @@ if (assigne && assigne.identifiant === 'FERME') {
     const evenements = assigne.evenements || [];
     const aMembre = assigne.identifiant && assigne.identifiant !== 'FERME';
     const aFerme = assigne.identifiant === 'FERME';
-    const aVert = !!(assigne.espace_vert_identifiant || evenements.includes('ESPACE_VERT'));
+    const vert2 = lireEspaceVert2(assigne);
+    const aVert = !!(assigne.espace_vert_identifiant || vert2 || evenements.includes('ESPACE_VERT'));
     const aReunion = evenements.includes('REUNION_BUREAU');
     const aAG = evenements.includes('AG');
     const aArmes = evenements.includes('ENTRETIEN_ARMES');
@@ -406,7 +444,12 @@ if (assigne && assigne.identifiant === 'FERME') {
 
     if (aFerme) carte.appendChild(ligneStatut('🔒', 'Fermé'));
     if (aMembre) carte.appendChild(ligneStatut('👤', 'Permanence : ' + assigne.prenom + ' ' + assigne.nom));
-    if (aVert) carte.appendChild(ligneStatut('🌳', 'Espace vert' + (assigne.espace_vert_prenom ? ' : ' + assigne.espace_vert_prenom + ' ' + assigne.espace_vert_nom : '')));
+    if (aVert) {
+      const personnesVert = [];
+      if (assigne.espace_vert_prenom) personnesVert.push(assigne.espace_vert_prenom + ' ' + assigne.espace_vert_nom);
+      if (vert2) personnesVert.push(vert2.prenom + ' ' + vert2.nom);
+      carte.appendChild(ligneStatut('🌳', 'Espace vert' + (personnesVert.length ? ' : ' + personnesVert.join(' et ') : '')));
+    }
     if (aReunion) carte.appendChild(ligneStatut('🗂️', 'Réunion de bureau'));
     if (aAG) carte.appendChild(ligneStatut('📋', 'Assemblée générale'));
     if (aArmes) carte.appendChild(ligneStatut('🛠️', 'Entretien des armes'));
@@ -504,13 +547,18 @@ const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
     menu.appendChild(separateurVert);
 
     const vertActuel = actuel && actuel.espace_vert_identifiant;
-    const vertPresent = !!(actuel && (actuel.espace_vert_identifiant || evenementsActuels.includes('ESPACE_VERT')));
+    const vert2Actuel = lireEspaceVert2(actuel);
+    const vertPresent = !!(actuel && (actuel.espace_vert_identifiant || vert2Actuel || evenementsActuels.includes('ESPACE_VERT')));
     if (estAdmin || vertPresent) {
       const itemVert = document.createElement('div');
       itemVert.className = 'item-menu';
       itemVert.innerHTML = `<span class="pastille-menu" style="background:#2ecc71;"></span>🌳 Espace vert` +
-        (vertActuel ? ` — ${actuel.espace_vert_prenom}` : '');
-      itemVert.onclick = () => ouvrirSousMenuEspaceVert(dateStr, caseElement);
+        (vertActuel ? ` — ${actuel.espace_vert_prenom}` : '') +
+        (vert2Actuel ? ` + ${vert2Actuel.prenom}` : '');
+      itemVert.onclick = (evt) => {
+        evt.stopPropagation();
+        ouvrirSousMenuEspaceVert(dateStr, caseElement);
+      };
       menu.appendChild(itemVert);
     }
 
@@ -584,20 +632,18 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     menu.innerHTML = "";
     const actuel = permanencesDuMois[dateStr];
     const vertActuel = actuel && actuel.espace_vert_identifiant;
-    const vertPresent = actuel && (actuel.espace_vert_identifiant || (actuel.evenements && actuel.evenements.includes('ESPACE_VERT')));
+    const vert2Actuel = lireEspaceVert2(actuel);
+    const vertPresent = actuel && (actuel.espace_vert_identifiant || vert2Actuel || (actuel.evenements && actuel.evenements.includes('ESPACE_VERT')));
     const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
 
     if (membresBureau.length === 0) {
       menu.innerHTML = `<div class="item-menu" style="color:var(--texte-att);cursor:default;">Aucun membre du bureau</div>`;
     } else {
-      membresBureau.forEach(m => {
-        const actif = vertActuel === m.identifiant;
-        const item = document.createElement('div');
-        item.className = 'item-menu';
-        item.innerHTML = `<span class="pastille-menu" style="background:#2ecc71;"></span>${actif ? '✓ ' : ''}${m.prenom} ${m.nom}`;
-        item.onclick = () => assignerEspaceVert(dateStr, m);
-        menu.appendChild(item);
-      });
+      ajouterChoixPersonneEspaceVert(menu, dateStr, 1, vertActuel);
+      const sepPersonnes = document.createElement('div');
+      sepPersonnes.className = 'separateur';
+      menu.appendChild(sepPersonnes);
+      ajouterChoixPersonneEspaceVert(menu, dateStr, 2, vert2Actuel && vert2Actuel.identifiant);
     }
 
     // Seuls les administrateurs peuvent supprimer Espace vert. Les autres
@@ -619,7 +665,10 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     const itemRetour = document.createElement('div');
     itemRetour.className = 'item-menu item-annuler';
     itemRetour.textContent = '← Retour';
-    itemRetour.onclick = () => ouvrirMenuJour({ stopPropagation(){} }, dateStr, caseElement);
+    itemRetour.onclick = (evt) => {
+      evt.stopPropagation();
+      ouvrirMenuJour({ stopPropagation(){} }, dateStr, caseElement);
+    };
     menu.appendChild(itemRetour);
 
     // Ce sous-menu peut être ouvert directement depuis la fiche de détail :
@@ -644,29 +693,97 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     menu.style.top = top + "px";
   }
 
-  async function assignerEspaceVert(dateStr, membre) {
+  function ajouterChoixPersonneEspaceVert(menu, dateStr, numero, identifiantActuel) {
+    const titre = document.createElement('div');
+    titre.className = 'item-menu';
+    titre.style.color = 'var(--menthe)';
+    titre.style.cursor = 'default';
+    titre.style.fontWeight = '800';
+    titre.textContent = 'Personne ' + numero;
+    menu.appendChild(titre);
+
+    membresBureau.forEach(m => {
+      const actif = identifiantActuel === m.identifiant;
+      const item = document.createElement('div');
+      item.className = 'item-menu';
+      item.innerHTML = `<span class="pastille-menu" style="background:#2ecc71;"></span>${actif ? '✓ ' : ''}${m.prenom} ${m.nom}`;
+      item.onclick = () => assignerEspaceVert(dateStr, m, numero);
+      menu.appendChild(item);
+    });
+
+    if (numero === 2 && identifiantActuel) {
+      const retirer = document.createElement('div');
+      retirer.className = 'item-menu item-supprimer';
+      retirer.textContent = '✖️ Retirer la personne 2';
+      retirer.onclick = () => retirerPersonne2EspaceVert(dateStr);
+      menu.appendChild(retirer);
+    }
+  }
+
+  async function assignerEspaceVert(dateStr, membre, numero = 1) {
     const actuel = permanencesDuMois[dateStr];
-    const dejaCree = !!(actuel && (actuel.espace_vert_identifiant || (actuel.evenements && actuel.evenements.includes('ESPACE_VERT'))));
+    const vert2Actuel = lireEspaceVert2(actuel);
+    const dejaCree = !!(actuel && (actuel.espace_vert_identifiant || vert2Actuel || (actuel.evenements && actuel.evenements.includes('ESPACE_VERT'))));
     if (!dejaCree && !ADMIN_IDS.includes(sessionData.identifiant)) {
       alert("Seuls Christophe et Serge peuvent créer Espace vert.");
       return;
     }
-    const ancienNom = dejaCree && actuel.espace_vert_identifiant !== membre.identifiant
-      ? ((actuel.espace_vert_prenom || '') + " " + (actuel.espace_vert_nom || '')).trim()
-      : null;
+    const identifiantActuel = numero === 1
+      ? (actuel && actuel.espace_vert_identifiant)
+      : (vert2Actuel && vert2Actuel.identifiant);
+    const identifiantAutre = numero === 1
+      ? (vert2Actuel && vert2Actuel.identifiant)
+      : (actuel && actuel.espace_vert_identifiant);
+    if (identifiantActuel === membre.identifiant) {
+      fermerMenu();
+      return;
+    }
+    if (identifiantAutre === membre.identifiant) {
+      alert("Cette personne est déjà affectée à Espace vert.");
+      return;
+    }
+    const ancienNom = numero === 2
+      ? (vert2Actuel && vert2Actuel.identifiant !== membre.identifiant ? (vert2Actuel.prenom + ' ' + vert2Actuel.nom) : null)
+      : (dejaCree && actuel.espace_vert_identifiant !== membre.identifiant
+        ? ((actuel.espace_vert_prenom || '') + " " + (actuel.espace_vert_nom || '')).trim()
+        : null);
+    const evenements = numero === 2
+      ? ecrireEspaceVert2((actuel && actuel.evenements) || [], membre)
+      : ecrireEspaceVert2((actuel && actuel.evenements) || [], vert2Actuel);
     const { error } = await sb.from('permanences').upsert({
       date: dateStr,
       identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
       nom: (actuel && actuel.nom) ? actuel.nom : null,
       prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
-      evenements: (actuel && actuel.evenements) ? actuel.evenements.filter(e => e !== 'ESPACE_VERT') : [],
-      espace_vert_identifiant: membre.identifiant,
-      espace_vert_nom: membre.nom,
-      espace_vert_prenom: membre.prenom,
+      evenements,
+      espace_vert_identifiant: numero === 1 ? membre.identifiant : (actuel && actuel.espace_vert_identifiant) || null,
+      espace_vert_nom: numero === 1 ? membre.nom : (actuel && actuel.espace_vert_nom) || null,
+      espace_vert_prenom: numero === 1 ? membre.prenom : (actuel && actuel.espace_vert_prenom) || null,
       updated_at: new Date().toISOString()
     });
     if (error) { console.error('assignerEspaceVert:', error); alert("Erreur lors de l'attribution : " + error.message); return; }
-    notifierSiBesoin(dateStr, "attribue", "Espace vert — " + membre.prenom + " " + membre.nom, ancienNom);
+    notifierSiBesoin(dateStr, "attribue", "Espace vert — personne " + numero + " : " + membre.prenom + " " + membre.nom, ancienNom);
+    fermerMenu();
+    chargerMois();
+  }
+
+  async function retirerPersonne2EspaceVert(dateStr) {
+    const actuel = permanencesDuMois[dateStr];
+    const ancien = lireEspaceVert2(actuel);
+    if (!ancien) return;
+    const { error } = await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
+      nom: (actuel && actuel.nom) ? actuel.nom : null,
+      prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
+      evenements: ecrireEspaceVert2((actuel && actuel.evenements) || [], null),
+      espace_vert_identifiant: actuel.espace_vert_identifiant || null,
+      espace_vert_nom: actuel.espace_vert_nom || null,
+      espace_vert_prenom: actuel.espace_vert_prenom || null,
+      updated_at: new Date().toISOString()
+    });
+    if (error) { console.error('retirerPersonne2EspaceVert:', error); alert("Erreur lors du retrait : " + error.message); return; }
+    notifierSiBesoin(dateStr, "supprime", "Espace vert — personne 2 : " + ancien.prenom + " " + ancien.nom);
     fermerMenu();
     chargerMois();
   }
@@ -682,7 +799,7 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
       identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
       nom: (actuel && actuel.nom) ? actuel.nom : null,
       prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
-      evenements: (actuel && actuel.evenements) ? actuel.evenements.filter(e => e !== 'ESPACE_VERT') : [],
+      evenements: ecrireEspaceVert2((actuel && actuel.evenements) || [], null),
       espace_vert_identifiant: null,
       espace_vert_nom: null,
       espace_vert_prenom: null,
