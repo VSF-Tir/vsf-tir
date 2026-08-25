@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="noindex, nofollow" name="robots"/>
+<title>Horloge VSF - Accès et changement Wi-Fi</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="style.css" rel="stylesheet"/>
+<link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
+<style>
+  :root { --bleu-horloge:#1264e8; --rouge-horloge:#df1830; --vert-ok:#1aa45b; }
+  .page-horloge { max-width: 980px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .retour-admin { display:inline-flex; align-items:center; gap:.45rem; margin-bottom:1.2rem; color:var(--or); text-decoration:none; font-weight:800; }
+  .hero-horloge { position:relative; overflow:hidden; padding:2rem; border-radius:18px; background:linear-gradient(145deg,#07111e,#101a28); box-shadow:0 14px 34px rgba(0,0,0,.3); }
+  .hero-horloge::after { content:""; position:absolute; left:0; right:0; bottom:0; height:4px; background:linear-gradient(90deg,var(--bleu-horloge) 0 47%,#fff 47% 53%,var(--rouge-horloge) 53%); }
+  .hero-horloge h1 { margin:0 0 .45rem; color:#fff; font-family:var(--police-titre); font-size:clamp(1.7rem,5vw,2.7rem); }
+  .hero-horloge p { margin:0; color:var(--texte-att); }
+  .identite { margin-top:1.15rem; display:flex; flex-wrap:wrap; gap:.65rem; }
+  .badge { padding:.55rem .8rem; border-radius:999px; background:#14263a; border:1px solid #294b6f; color:#dcecff; font-family:var(--police-donnee); font-size:.85rem; }
+  .zone-acces { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin:1.35rem 0 2rem; }
+  .acces { display:flex; flex-direction:column; min-height:185px; padding:1.2rem; border-radius:16px; background:var(--fond-carte); box-shadow:0 10px 25px rgba(0,0,0,.22); border-top:4px solid var(--menthe); }
+  .acces.urgence { border-color:var(--rouge-horloge); }
+  .acces h2 { margin:0 0 .45rem; color:#fff; font-size:1.05rem; }
+  .acces p { margin:0 0 1rem; color:var(--texte-att); font-size:.9rem; line-height:1.45; }
+  .btn-acces { display:block; width:100%; margin-top:auto; padding:.78rem .9rem; border:0; border-radius:10px; background:linear-gradient(90deg,#075ee5,#163c79); color:#fff; text-align:center; text-decoration:none; font:800 .92rem var(--police-texte); cursor:pointer; }
+  .urgence .btn-acces { background:linear-gradient(90deg,#bb1026,#ef2940); }
+  .ip-ligne { display:flex; gap:.5rem; margin:.15rem 0 .65rem; }
+  .ip-ligne input { min-width:0; width:100%; border:1px solid #315c85; border-radius:9px; background:#07101b; color:#fff; padding:.68rem; font-family:var(--police-donnee); }
+  .ip-ligne button { border:0; border-radius:9px; background:var(--or); color:#111; padding:.68rem .8rem; font-weight:900; cursor:pointer; }
+  .message-ip { min-height:1.1rem; color:#7ee7aa; font-size:.78rem; margin-bottom:.35rem; }
+  .bloc-tuto { margin-top:1.3rem; padding:1.4rem; border-radius:17px; background:var(--fond-carte); box-shadow:0 10px 25px rgba(0,0,0,.22); }
+  .bloc-tuto h2 { margin:0 0 1rem; color:#fff; }
+  .bloc-tuto.normal { border-left:5px solid var(--bleu-horloge); }
+  .bloc-tuto.secours { border-left:5px solid var(--rouge-horloge); }
+  .etapes { display:grid; gap:.8rem; counter-reset:etape; }
+  .etape { position:relative; padding-left:2.8rem; color:#eaf2fa; line-height:1.5; counter-increment:etape; }
+  .etape::before { content:counter(etape); position:absolute; left:0; top:.05rem; width:1.9rem; height:1.9rem; display:grid; place-items:center; border-radius:50%; background:var(--bleu-horloge); color:#fff; font-weight:900; }
+  .secours .etape::before { background:var(--rouge-horloge); }
+  .info-secours { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin:1rem 0; }
+  .secret { padding:.85rem; border-radius:11px; background:#0b1725; border:1px solid #2c4966; color:#fff; }
+  .secret small { display:block; color:var(--texte-att); margin-bottom:.25rem; }
+  .secret strong { font-family:var(--police-donnee); overflow-wrap:anywhere; }
+  .note { margin-top:1rem; padding:.9rem 1rem; border-radius:11px; background:#0c2a1d; border:1px solid #1b7948; color:#b9f3d2; }
+  @media (max-width:800px) { .zone-acces { grid-template-columns:1fr; } .acces { min-height:0; } }
+  @media (max-width:520px) { .page-horloge { padding:1.1rem .8rem 3rem; } .hero-horloge { padding:1.35rem; } .info-secours { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="entete">
+  <div class="nav-conteneur">
+    <a class="logo" href="index.html"><img alt="VSF Tir Cible" class="logo-img" src="ImageSite/logo_club.png"/><span style="font-family:var(--police-titre);font-size:1.3rem;color:#fff;">VSF <span style="color:var(--or);">TIR CIBLE</span></span></a>
+  </div>
+</header>
+
+<main class="page-horloge" id="contenu" hidden>
+  <a class="retour-admin" href="adminbarbaredestroy.html">← Retour à l'administration</a>
+  <section class="hero-horloge">
+    <h1>Horloge VSF - Accès et Wi-Fi</h1>
+    <p>Ouvrir les réglages de l'horloge ou la connecter à une nouvelle box sans démontage.</p>
+    <div class="identite">
+      <span class="badge">Appareil : esp32s3-C4B7A8</span>
+      <span class="badge">Nom local : horloge-vsf.local</span>
+    </div>
+  </section>
+
+  <section class="zone-acces" aria-label="Accès directs">
+    <article class="acces">
+      <h2>Accès par nom local</h2>
+      <p>À utiliser lorsque le téléphone ou le PC est connecté au même réseau que l'horloge.</p>
+      <a class="btn-acces" href="http://horloge-vsf.local" target="_blank" rel="noopener">Ouvrir horloge-vsf.local</a>
+    </article>
+
+    <article class="acces">
+      <h2>Accès par IP fixe</h2>
+      <p>Saisir l'adresse attribuée dans la box. Elle sera mémorisée uniquement dans ce navigateur.</p>
+      <div class="ip-ligne"><input id="ip-horloge" inputmode="decimal" placeholder="192.168.1.50"/><button id="sauver-ip" type="button">OK</button></div>
+      <div class="message-ip" id="message-ip"></div>
+      <a class="btn-acces" href="#" id="ouvrir-ip" target="_blank" rel="noopener">Ouvrir l'adresse IP</a>
+    </article>
+
+    <article class="acces urgence">
+      <h2>Réseau de secours</h2>
+      <p>Disponible si l'horloge ne trouve plus l'ancienne box. Le téléphone doit être connecté à Horloge-VSF-Config.</p>
+      <a class="btn-acces" href="http://192.168.4.1" target="_blank" rel="noopener">Ouvrir 192.168.4.1</a>
+    </article>
+  </section>
+
+  <section class="bloc-tuto normal">
+    <h2>Méthode 1 - Depuis la box actuelle</h2>
+    <div class="etapes">
+      <div class="etape">Connecter le téléphone ou l'ordinateur au <strong>même réseau Wi-Fi</strong> que l'horloge.</div>
+      <div class="etape">Utiliser l'un des boutons ci-dessus : <strong>horloge-vsf.local</strong> ou l'adresse IP fixe.</div>
+      <div class="etape">En bas de la page de l'horloge, appuyer sur <strong>Changer de réseau Wi-Fi</strong>.</div>
+      <div class="etape">Choisir la nouvelle box dans la liste des réseaux détectés et saisir son mot de passe.</div>
+      <div class="etape">Appuyer sur <strong>Enregistrer et redémarrer</strong>. L'horloge mémorise le nouveau réseau.</div>
+    </div>
+  </section>
+
+  <section class="bloc-tuto secours">
+    <h2>Méthode 2 - Ancienne box en panne ou déjà remplacée</h2>
+    <div class="info-secours">
+      <div class="secret"><small>Réseau Wi-Fi de secours</small><strong>Horloge-VSF-Config</strong></div>
+      <div class="secret"><small>Mot de passe</small><strong>VSFhorloge</strong></div>
+    </div>
+    <div class="etapes">
+      <div class="etape">Allumer l'horloge et attendre environ <strong>30 secondes</strong>.</div>
+      <div class="etape">Dans les réglages Wi-Fi du téléphone, se connecter à <strong>Horloge-VSF-Config</strong>.</div>
+      <div class="etape">Saisir le mot de passe <strong>VSFhorloge</strong>. Si Android affiche « Aucun accès Internet », choisir <strong>Rester connecté</strong>.</div>
+      <div class="etape">Appuyer sur le bouton rouge <strong>Ouvrir 192.168.4.1</strong> situé plus haut.</div>
+      <div class="etape">Choisir la nouvelle box, saisir son mot de passe puis enregistrer. L'horloge redémarre automatiquement.</div>
+    </div>
+    <div class="note"><strong>Important :</strong> le message, les couleurs et les identifiants Wi-Fi restent mémorisés après une coupure de courant.</div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="pied-conteneur">
+    <div class="pied-marque"><img alt="VSF Tir Cible" src="ImageSite/logo_club.png"/><div><strong>VSF Tir Cible</strong><br/>📍 Champ Blanc, 72400 La Ferté-Bernard</div></div>
+    <div>📞 <a href="tel:0607095592">06 07 09 55 92</a><br/>✉️ <a href="mailto:stophe28@aol.com">stophe28@aol.com</a></div>
+    <div>💬 <a href="contact.html">Nous contacter</a></div>
+  </div>
+</footer>
+
+<script>
+  const ADMIN_IDS = ["hinser", "dinchr"];
+  const brut = sessionStorage.getItem('vsf_admin');
+  let data = null;
+  try { data = brut ? JSON.parse(brut) : null; } catch (_) { data = null; }
+
+  if (!data || !ADMIN_IDS.includes(data.identifiant)) {
+    window.location.href = 'reservation.html';
+  } else {
+    document.getElementById('contenu').hidden = false;
+  }
+
+  const champIp = document.getElementById('ip-horloge');
+  const boutonIp = document.getElementById('ouvrir-ip');
+  const messageIp = document.getElementById('message-ip');
+  const cleIp = 'vsf_horloge_ip_fixe';
+
+  function nettoyerIp(valeur) {
+    return valeur.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
+  }
+
+  function ipValide(ip) {
+    const parties = ip.split('.');
+    return parties.length === 4 && parties.every(p => /^\d{1,3}$/.test(p) && Number(p) >= 0 && Number(p) <= 255);
+  }
+
+  function actualiserLienIp() {
+    const ip = nettoyerIp(champIp.value);
+    boutonIp.href = ipValide(ip) ? 'http://' + ip : '#';
+  }
+
+  const ipMemorisee = localStorage.getItem(cleIp) || '';
+  champIp.value = ipMemorisee;
+  actualiserLienIp();
+
+  champIp.addEventListener('input', () => { messageIp.textContent = ''; actualiserLienIp(); });
+  document.getElementById('sauver-ip').addEventListener('click', () => {
+    const ip = nettoyerIp(champIp.value);
+    if (!ipValide(ip)) {
+      messageIp.textContent = 'Adresse IP invalide.';
+      return;
+    }
+    champIp.value = ip;
+    localStorage.setItem(cleIp, ip);
+    actualiserLienIp();
+    messageIp.textContent = 'Adresse enregistrée sur cet appareil.';
+  });
+
+  boutonIp.addEventListener('click', event => {
+    if (!ipValide(nettoyerIp(champIp.value))) {
+      event.preventDefault();
+      messageIp.textContent = 'Saisissez et enregistrez d’abord l’adresse IP fixe.';
+    }
+  });
+</script>
+</body>
+</html>
