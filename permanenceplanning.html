@@ -178,6 +178,9 @@
   // La seconde est conservée dans evenements afin de rester compatible avec
   // la table Supabase existante, sans migration de base de données.
   const PREFIXE_ESPACE_VERT_2 = 'ESPACE_VERT_2:';
+  const PREFIXE_ARMURERIE = 'ARMURERIE:';
+  const COULEURS_ARMURERIE = ['#ff3b30', '#ff9500', '#ffcc00', '#34c759', '#00c7ff', '#5856d6', '#af52de'];
+  const FOND_ARMURERIE = 'linear-gradient(90deg, #ff3b30, #ff9500, #ffcc00, #34c759, #00c7ff, #5856d6, #af52de)';
 
   function lireEspaceVert2(assigne) {
     const evenements = (assigne && assigne.evenements) ? assigne.evenements : [];
@@ -197,6 +200,32 @@
     );
     if (membre) {
       autres.push(PREFIXE_ESPACE_VERT_2 + encodeURIComponent(JSON.stringify({
+        identifiant: membre.identifiant,
+        nom: membre.nom,
+        prenom: membre.prenom
+      })));
+    }
+    return autres;
+  }
+
+  function lireArmurerie(assigne) {
+    const evenements = (assigne && assigne.evenements) ? assigne.evenements : [];
+    const valeur = evenements.find(e => typeof e === 'string' && e.startsWith(PREFIXE_ARMURERIE));
+    if (!valeur) return null;
+    try {
+      return JSON.parse(decodeURIComponent(valeur.slice(PREFIXE_ARMURERIE.length)));
+    } catch (e) {
+      console.error('Affectation armurerie illisible :', e);
+      return null;
+    }
+  }
+
+  function ecrireArmurerie(evenements, membre) {
+    const autres = (evenements || []).filter(e =>
+      !(typeof e === 'string' && e.startsWith(PREFIXE_ARMURERIE))
+    );
+    if (membre) {
+      autres.push(PREFIXE_ARMURERIE + encodeURIComponent(JSON.stringify({
         identifiant: membre.identifiant,
         nom: membre.nom,
         prenom: membre.prenom
@@ -329,7 +358,9 @@ if (assigne && assigne.identifiant === 'FERME') {
       } else {
         const evenements = (assigne && assigne.evenements) ? assigne.evenements : [];
         const vert2 = lireEspaceVert2(assigne);
+        const armurerie = lireArmurerie(assigne);
         const aVert = !!(assigne && (assigne.espace_vert_identifiant || vert2 || evenements.includes('ESPACE_VERT')));
+        const aArmurerie = !!armurerie;
         const aReunion = evenements.includes('REUNION_BUREAU');
         const aAG = evenements.includes('AG');
         const aArmes = evenements.includes('ENTRETIEN_ARMES');
@@ -349,10 +380,13 @@ if (assigne && assigne.identifiant === 'FERME') {
           couleursActives.forEach(c => {
             pastilles += `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:3px;"></span>`;
           });
+          if (aArmurerie) {
+            pastilles += `<span style="display:inline-block;width:18px;height:8px;border-radius:5px;background:${FOND_ARMURERIE};margin-right:3px;"></span>`;
+          }
           case_.innerHTML = `<div class="numero">${jour}</div>` +
             (pastilles ? `<div style="display:flex;">${pastilles}</div>` : '') +
             `<div class="nom-assigne" style="color:${couleur};background:${couleur}33;">${assigne.prenom} ${assigne.nom}</div>`;
-        } else if (couleursActives.length > 0) {
+        } else if (couleursActives.length > 0 || aArmurerie) {
           const libelles = [];
           if (aVert) {
             const prenomsVert = [];
@@ -363,20 +397,26 @@ if (assigne && assigne.identifiant === 'FERME') {
           if (aReunion) libelles.push('🗂️ Réunion');
           if (aAG) libelles.push('📋 AG');
           if (aArmes) libelles.push('🛠️ Entretien armes');
+          if (aArmurerie) libelles.push('🔑 Armurerie (' + armurerie.prenom + ')');
           const texte = libelles.join(' + ');
           let fond;
-          if (couleursActives.length === 1) {
-            fond = couleursActives[0] + '33';
+          const couleursPourFond = aArmurerie
+            ? [...couleursActives, ...COULEURS_ARMURERIE]
+            : couleursActives;
+          if (aArmurerie && couleursActives.length === 0) {
+            fond = FOND_ARMURERIE;
+          } else if (couleursPourFond.length === 1) {
+            fond = couleursPourFond[0] + '33';
           } else {
-            const n = couleursActives.length;
-            const segments = couleursActives.map((c, i) => {
+            const n = couleursPourFond.length;
+            const segments = couleursPourFond.map((c, i) => {
               const debut = (i / n * 100).toFixed(2);
               const fin = ((i + 1) / n * 100).toFixed(2);
               return `${c} ${debut}%, ${c} ${fin}%`;
             }).join(', ');
             fond = `linear-gradient(135deg, ${segments})`;
           }
-          case_.style.borderColor = couleursActives[couleursActives.length - 1];
+          case_.style.borderColor = aArmurerie ? '#af52de' : couleursActives[couleursActives.length - 1];
           case_.style.background = fond;
           case_.innerHTML = `<div class="numero">${jour}</div>` +
             `<div class="nom-assigne" style="color:#fff;background:rgba(0,0,0,0.35);">${texte}</div>`;
@@ -416,10 +456,12 @@ if (assigne && assigne.identifiant === 'FERME') {
     const aMembre = assigne.identifiant && assigne.identifiant !== 'FERME';
     const aFerme = assigne.identifiant === 'FERME';
     const vert2 = lireEspaceVert2(assigne);
+    const armurerie = lireArmurerie(assigne);
     const aVert = !!(assigne.espace_vert_identifiant || vert2 || evenements.includes('ESPACE_VERT'));
     const aReunion = evenements.includes('REUNION_BUREAU');
     const aAG = evenements.includes('AG');
     const aArmes = evenements.includes('ENTRETIEN_ARMES');
+    const aArmurerie = !!armurerie;
     const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
 
     const ouvrirEdition = () => {
@@ -429,6 +471,10 @@ if (assigne && assigne.identifiant === 'FERME') {
     const ouvrirVert = () => {
       fermerDetail();
       ouvrirSousMenuEspaceVert(dateStr, caseElement);
+    };
+    const ouvrirArmurerie = () => {
+      fermerDetail();
+      ouvrirSousMenuArmurerie(dateStr, caseElement);
     };
     const toggleDepuisDetail = (tag) => {
       fermerDetail();
@@ -453,6 +499,7 @@ if (assigne && assigne.identifiant === 'FERME') {
     if (aReunion) carte.appendChild(ligneStatut('🗂️', 'Réunion de bureau'));
     if (aAG) carte.appendChild(ligneStatut('📋', 'Assemblée générale'));
     if (aArmes) carte.appendChild(ligneStatut('🛠️', 'Entretien des armes'));
+    if (aArmurerie) carte.appendChild(ligneStatut('🔑', 'Armurerie : ' + armurerie.prenom + ' ' + armurerie.nom));
 
     const actions = document.createElement('div');
     actions.className = 'actions-detail';
@@ -468,6 +515,7 @@ if (assigne && assigne.identifiant === 'FERME') {
       if (aVert || estAdmin) {
         actions.appendChild(boutonDetail(aVert ? '✏️ Modifier Espace vert' : '➕ Créer Espace vert', ouvrirVert));
       }
+      actions.appendChild(boutonDetail(aArmurerie ? '✏️ Modifier Armurerie' : '➕ Créer Armurerie', ouvrirArmurerie));
       if (estAdmin) {
         if (aMembre) actions.appendChild(boutonDetail('🗑️ Supprimer la permanence', () => retirerPermanence(dateStr)));
         if (aVert) actions.appendChild(boutonDetail('🗑️ Supprimer Espace vert', () => retirerEspaceVert(dateStr)));
@@ -561,6 +609,20 @@ const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
       };
       menu.appendChild(itemVert);
     }
+
+    const armurerieActuelle = lireArmurerie(actuel);
+    const separateurArmurerie = document.createElement('div');
+    separateurArmurerie.className = 'separateur';
+    menu.appendChild(separateurArmurerie);
+    const itemArmurerie = document.createElement('div');
+    itemArmurerie.className = 'item-menu';
+    itemArmurerie.innerHTML = `<span class="pastille-menu" style="background:${FOND_ARMURERIE};"></span>🔑 Armurerie` +
+      (armurerieActuelle ? ` — ${armurerieActuelle.prenom}` : '');
+    itemArmurerie.onclick = (evt) => {
+      evt.stopPropagation();
+      ouvrirSousMenuArmurerie(dateStr, caseElement);
+    };
+    menu.appendChild(itemArmurerie);
 
     const definitionsEvenements = [
       { tag: 'REUNION_BUREAU', label: 'Réunion de bureau', icone: '🗂️', couleur: '#e67e22', adminSeul: true },
@@ -691,6 +753,112 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
 
     menu.style.left = left + "px";
     menu.style.top = top + "px";
+  }
+
+  function ouvrirSousMenuArmurerie(dateStr, caseElement) {
+    const menu = document.getElementById('menu-perma');
+    menu.innerHTML = '';
+    const actuel = permanencesDuMois[dateStr];
+    const armurerieActuelle = lireArmurerie(actuel);
+
+    membresBureau.forEach(m => {
+      const actif = armurerieActuelle && armurerieActuelle.identifiant === m.identifiant;
+      const item = document.createElement('div');
+      item.className = 'item-menu';
+      item.innerHTML = `<span class="pastille-menu" style="background:${FOND_ARMURERIE};"></span>${actif ? '✓ ' : ''}${m.prenom} ${m.nom}`;
+      item.onclick = () => assignerArmurerie(dateStr, m);
+      menu.appendChild(item);
+    });
+
+    if (armurerieActuelle) {
+      const sep = document.createElement('div');
+      sep.className = 'separateur';
+      menu.appendChild(sep);
+      const retirer = document.createElement('div');
+      retirer.className = 'item-menu item-supprimer';
+      retirer.textContent = '🗑️ Retirer Armurerie';
+      retirer.onclick = () => retirerArmurerie(dateStr);
+      menu.appendChild(retirer);
+    }
+
+    const sepRetour = document.createElement('div');
+    sepRetour.className = 'separateur';
+    menu.appendChild(sepRetour);
+    const retour = document.createElement('div');
+    retour.className = 'item-menu item-annuler';
+    retour.textContent = '← Retour';
+    retour.onclick = (evt) => {
+      evt.stopPropagation();
+      ouvrirMenuJour({ stopPropagation(){} }, dateStr, caseElement);
+    };
+    menu.appendChild(retour);
+
+    menu.style.display = 'block';
+    const menuRect = menu.getBoundingClientRect();
+    const rect = caseElement.getBoundingClientRect();
+    let left = window.scrollX + rect.left;
+    const maxLeft = window.scrollX + document.documentElement.clientWidth - menuRect.width - 10;
+    if (left > maxLeft) left = Math.max(window.scrollX + 10, maxLeft);
+    let top = window.scrollY + rect.bottom + 6;
+    const maxTop = window.scrollY + document.documentElement.clientHeight - menuRect.height - 10;
+    if (top > maxTop) {
+      top = window.scrollY + rect.top - menuRect.height - 6;
+      if (top < window.scrollY + 10) top = window.scrollY + 10;
+    }
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+  }
+
+  async function assignerArmurerie(dateStr, membre) {
+    const actuel = permanencesDuMois[dateStr];
+    const ancien = lireArmurerie(actuel);
+    if (ancien && ancien.identifiant === membre.identifiant) {
+      fermerMenu();
+      return;
+    }
+    const { error } = await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
+      nom: (actuel && actuel.nom) ? actuel.nom : null,
+      prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
+      evenements: ecrireArmurerie((actuel && actuel.evenements) || [], membre),
+      espace_vert_identifiant: (actuel && actuel.espace_vert_identifiant) || null,
+      espace_vert_nom: (actuel && actuel.espace_vert_nom) || null,
+      espace_vert_prenom: (actuel && actuel.espace_vert_prenom) || null,
+      updated_at: new Date().toISOString()
+    });
+    if (error) { console.error('assignerArmurerie:', error); alert("Erreur lors de l'attribution : " + error.message); return; }
+    notifierSiBesoin(
+      dateStr,
+      'attribue',
+      'Armurerie : ' + membre.prenom + ' ' + membre.nom,
+      ancien ? ancien.prenom + ' ' + ancien.nom : null
+    );
+    fermerMenu();
+    fermerDetail();
+    chargerMois();
+  }
+
+  async function retirerArmurerie(dateStr) {
+    const actuel = permanencesDuMois[dateStr];
+    const ancien = lireArmurerie(actuel);
+    if (!ancien) return;
+    const { error } = await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: (actuel && actuel.identifiant) ? actuel.identifiant : null,
+      nom: (actuel && actuel.nom) ? actuel.nom : null,
+      prenom: (actuel && actuel.prenom) ? actuel.prenom : null,
+      evenements: ecrireArmurerie((actuel && actuel.evenements) || [], null),
+      espace_vert_identifiant: (actuel && actuel.espace_vert_identifiant) || null,
+      espace_vert_nom: (actuel && actuel.espace_vert_nom) || null,
+      espace_vert_prenom: (actuel && actuel.espace_vert_prenom) || null,
+      updated_at: new Date().toISOString()
+    });
+    if (error) { console.error('retirerArmurerie:', error); alert("Erreur lors du retrait : " + error.message); return; }
+    notifierSiBesoin(dateStr, 'supprime', 'Armurerie : ' + ancien.prenom + ' ' + ancien.nom);
+    fermerMenu();
+    fermerDetail();
+    chargerMois();
   }
 
   function ajouterChoixPersonneEspaceVert(menu, dateStr, numero, identifiantActuel) {
