@@ -101,11 +101,11 @@
 <h2>Se connecter</h2>
 <div class="champ-login">
 <label for="identifiant">Identifiant</label>
-<input autocomplete="username" id="identifiant" type="text"/>
+<input autocomplete="username" autocapitalize="none" id="identifiant" maxlength="6" pattern="[a-z]{6}" spellcheck="false" type="text"/>
 </div>
 <div class="champ-login">
 <label for="motdepasse">Numéro de licence</label>
-<input autocomplete="off" id="motdepasse" inputmode="numeric" type="text"/>
+<input autocomplete="off" id="motdepasse" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" type="text"/>
 </div>
 <label style="display:flex;align-items:center;gap:8px;margin:-0.4rem 0 1rem;color:var(--texte);font-size:0.9rem;">
 <input id="vsf-remember" type="checkbox"/> Se souvenir de mon identifiant et de mon numéro de licence
@@ -170,14 +170,41 @@
     return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
+  function nettoyerIdentifiant(valeur) {
+    return valeur
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z]/g, '')
+      .slice(0, 6);
+  }
+
+  function nettoyerNumeroLicence(valeur) {
+    return valeur.replace(/\D/g, '').slice(0, 8);
+  }
+
   async function connecter() {
-    const id = document.getElementById('identifiant').value.trim().toLowerCase();
-    const mdp = document.getElementById('motdepasse').value.trim();
+    const champIdentifiant = document.getElementById('identifiant');
+    const champMotDePasse = document.getElementById('motdepasse');
+    const id = nettoyerIdentifiant(champIdentifiant.value);
+    const mdp = nettoyerNumeroLicence(champMotDePasse.value);
     const msg = document.getElementById('msg-login');
+    champIdentifiant.value = id;
+    champMotDePasse.value = mdp;
     msg.textContent = "";
 
     if (!id || !mdp) {
       msg.textContent = "Merci de remplir les deux champs.";
+      return;
+    }
+
+    if (id.length !== 6) {
+      msg.textContent = "L’identifiant doit contenir 6 lettres minuscules.";
+      return;
+    }
+
+    if (mdp.length !== 8) {
+      msg.textContent = "Le numéro de licence doit contenir exactement 8 chiffres.";
       return;
     }
 
@@ -226,11 +253,22 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const champIdentifiant = document.getElementById('identifiant');
+    const champMotDePasse = document.getElementById('motdepasse');
+
+    champIdentifiant.addEventListener('input', () => {
+      champIdentifiant.value = nettoyerIdentifiant(champIdentifiant.value);
+    });
+
+    champMotDePasse.addEventListener('input', () => {
+      champMotDePasse.value = nettoyerNumeroLicence(champMotDePasse.value);
+    });
+
     const idMemo = localStorage.getItem('vsf_id_memorise');
     const licMemo = localStorage.getItem('vsf_licence_memorisee');
     if (idMemo && licMemo) {
-      document.getElementById('identifiant').value = idMemo;
-      document.getElementById('motdepasse').value = licMemo;
+      champIdentifiant.value = nettoyerIdentifiant(idMemo);
+      champMotDePasse.value = nettoyerNumeroLicence(licMemo);
       document.getElementById('vsf-remember').checked = true;
     }
   });
