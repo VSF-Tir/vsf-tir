@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta content="noindex, nofollow" name="robots"/>
-<title>Horloge VSF - Accès et changement Wi-Fi</title>
+<title>Horloges VSF - Accès et changement Wi-Fi</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
 <link href="style.css" rel="stylesheet"/>
 <link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
@@ -18,17 +18,23 @@
   .hero-horloge p { margin:0; color:var(--texte-att); }
   .identite { margin-top:1.15rem; display:flex; flex-wrap:wrap; gap:.65rem; }
   .badge { padding:.55rem .8rem; border-radius:999px; background:#14263a; border:1px solid #294b6f; color:#dcecff; font-family:var(--police-donnee); font-size:.85rem; }
-  .zone-acces { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin:1.35rem 0 2rem; }
-  .acces { display:flex; flex-direction:column; min-height:185px; padding:1.2rem; border-radius:16px; background:var(--fond-carte); box-shadow:0 10px 25px rgba(0,0,0,.22); border-top:4px solid var(--menthe); }
+  .zone-acces { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin:1.35rem 0 2rem; }
+  .horloge-carte { padding:1.25rem; border-radius:17px; background:var(--fond-carte); box-shadow:0 10px 25px rgba(0,0,0,.22); border-top:4px solid var(--bleu-horloge); }
+  .horloge-carte:nth-child(2) { border-top-color:var(--menthe); }
+  .horloge-carte > h2 { margin:0 0 .25rem; color:#fff; font-size:1.25rem; }
+  .horloge-carte > p { margin:0 0 1rem; color:var(--texte-att); }
+  .acces { display:flex; flex-direction:column; min-height:145px; margin-top:.8rem; padding:1rem; border-radius:13px; background:#0b1725; border:1px solid #28445f; }
   .acces.urgence { border-color:var(--rouge-horloge); }
   .acces h2 { margin:0 0 .45rem; color:#fff; font-size:1.05rem; }
   .acces p { margin:0 0 1rem; color:var(--texte-att); font-size:.9rem; line-height:1.45; }
   .btn-acces { display:block; width:100%; margin-top:auto; padding:.78rem .9rem; border:0; border-radius:10px; background:linear-gradient(90deg,#075ee5,#163c79); color:#fff; text-align:center; text-decoration:none; font:800 .92rem var(--police-texte); cursor:pointer; }
+  .btn-acces + .btn-acces { margin-top:.55rem; }
+  .btn-acces.ip { background:#17314b; border:1px solid #315c85; }
   .urgence .btn-acces { background:linear-gradient(90deg,#bb1026,#ef2940); }
-  .ip-ligne { display:flex; gap:.5rem; margin:.15rem 0 .65rem; }
-  .ip-ligne input { min-width:0; width:100%; border:1px solid #315c85; border-radius:9px; background:#07101b; color:#fff; padding:.68rem; font-family:var(--police-donnee); }
-  .ip-ligne button { border:0; border-radius:9px; background:var(--or); color:#111; padding:.68rem .8rem; font-weight:900; cursor:pointer; }
-  .message-ip { min-height:1.1rem; color:#7ee7aa; font-size:.78rem; margin-bottom:.35rem; }
+  .adresses { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
+  .adresse { padding:.75rem; border-radius:10px; background:#07101b; border:1px solid #315c85; }
+  .adresse small { display:block; margin-bottom:.28rem; color:var(--texte-att); }
+  .adresse strong { color:#fff; font-family:var(--police-donnee); font-size:.85rem; overflow-wrap:anywhere; }
   .bloc-tuto { margin-top:1.3rem; padding:1.4rem; border-radius:17px; background:var(--fond-carte); box-shadow:0 10px 25px rgba(0,0,0,.22); }
   .bloc-tuto h2 { margin:0 0 1rem; color:#fff; }
   .bloc-tuto.normal { border-left:5px solid var(--bleu-horloge); }
@@ -56,33 +62,53 @@
 <main class="page-horloge" id="contenu" hidden>
   <a class="retour-admin" href="adminbarbaredestroy.html">← Retour à l'administration</a>
   <section class="hero-horloge">
-    <h1>Horloge VSF - Accès et Wi-Fi</h1>
-    <p>Ouvrir les réglages de l'horloge ou la connecter à une nouvelle box sans démontage.</p>
+    <h1>Horloges VSF - Accès et Wi-Fi</h1>
+    <p>Ouvrir les réglages des deux horloges ou les connecter à une nouvelle box sans démontage.</p>
     <div class="identite">
-      <span class="badge">Appareil : esp32s3-C4B7A8</span>
-      <span class="badge">Nom local : horloge-vsf.local</span>
+      <span class="badge">Horloge 1 : horloge-vsf.local - 192.168.1.50</span>
+      <span class="badge">Horloge 2 : horloge2-vsf.local - 192.168.1.51</span>
     </div>
   </section>
 
   <section class="zone-acces" aria-label="Accès directs">
-    <article class="acces">
-      <h2>Accès par nom local</h2>
-      <p>À utiliser lorsque le téléphone ou le PC est connecté au même réseau que l'horloge.</p>
-      <a class="btn-acces" href="http://horloge-vsf.local" target="_blank" rel="noopener">Ouvrir horloge-vsf.local</a>
+    <article class="horloge-carte">
+      <h2>Horloge VSF 1</h2>
+      <p>Première horloge - adresse IP fixe 192.168.1.50</p>
+      <div class="adresses">
+        <div class="adresse"><small>Nom local</small><strong>horloge-vsf.local</strong></div>
+        <div class="adresse"><small>Adresse IP</small><strong>192.168.1.50</strong></div>
+      </div>
+      <article class="acces">
+        <h2>Accès aux réglages</h2>
+        <p>Depuis le même réseau Wi-Fi, ouvrir la page permettant de modifier le message, les couleurs, les polices, l'heure et les effets.</p>
+        <a class="btn-acces" href="http://horloge-vsf.local" target="_blank" rel="noopener">Ouvrir par le nom local</a>
+        <a class="btn-acces ip" href="http://192.168.1.50" target="_blank" rel="noopener">Ouvrir 192.168.1.50</a>
+      </article>
+      <article class="acces urgence">
+        <h2>Réseau de secours</h2>
+        <p><strong>Horloge-VSF-Config</strong><br/>Mot de passe : <strong>VSFhorloge</strong></p>
+        <a class="btn-acces" href="http://192.168.4.1" target="_blank" rel="noopener">Ouvrir 192.168.4.1</a>
+      </article>
     </article>
 
-    <article class="acces">
-      <h2>Accès par IP fixe</h2>
-      <p>Saisir l'adresse attribuée dans la box. Elle sera mémorisée uniquement dans ce navigateur.</p>
-      <div class="ip-ligne"><input id="ip-horloge" inputmode="decimal" placeholder="192.168.1.50"/><button id="sauver-ip" type="button">OK</button></div>
-      <div class="message-ip" id="message-ip"></div>
-      <a class="btn-acces" href="#" id="ouvrir-ip" target="_blank" rel="noopener">Ouvrir l'adresse IP</a>
-    </article>
-
-    <article class="acces urgence">
-      <h2>Réseau de secours</h2>
-      <p>Disponible si l'horloge ne trouve plus l'ancienne box. Le téléphone doit être connecté à Horloge-VSF-Config.</p>
-      <a class="btn-acces" href="http://192.168.4.1" target="_blank" rel="noopener">Ouvrir 192.168.4.1</a>
+    <article class="horloge-carte">
+      <h2>Horloge VSF 2</h2>
+      <p>Deuxième horloge - adresse IP fixe 192.168.1.51</p>
+      <div class="adresses">
+        <div class="adresse"><small>Nom local</small><strong>horloge2-vsf.local</strong></div>
+        <div class="adresse"><small>Adresse IP</small><strong>192.168.1.51</strong></div>
+      </div>
+      <article class="acces">
+        <h2>Accès aux réglages</h2>
+        <p>Depuis le même réseau Wi-Fi, ouvrir la page permettant de modifier le message, les couleurs, les polices, l'heure et les effets.</p>
+        <a class="btn-acces" href="http://horloge2-vsf.local" target="_blank" rel="noopener">Ouvrir par le nom local</a>
+        <a class="btn-acces ip" href="http://192.168.1.51" target="_blank" rel="noopener">Ouvrir 192.168.1.51</a>
+      </article>
+      <article class="acces urgence">
+        <h2>Réseau de secours</h2>
+        <p><strong>Horloge2-VSF-Config</strong><br/>Mot de passe : <strong>VSFhorloge</strong></p>
+        <a class="btn-acces" href="http://192.168.4.1" target="_blank" rel="noopener">Ouvrir 192.168.4.1</a>
+      </article>
     </article>
   </section>
 
@@ -90,7 +116,7 @@
     <h2>Méthode 1 - Depuis la box actuelle</h2>
     <div class="etapes">
       <div class="etape">Connecter le téléphone ou l'ordinateur au <strong>même réseau Wi-Fi</strong> que l'horloge.</div>
-      <div class="etape">Utiliser l'un des boutons ci-dessus : <strong>horloge-vsf.local</strong> ou l'adresse IP fixe.</div>
+      <div class="etape">Ouvrir l'horloge concernée : <strong>horloge-vsf.local</strong> pour l'horloge 1 ou <strong>horloge2-vsf.local</strong> pour l'horloge 2.</div>
       <div class="etape">En bas de la page de l'horloge, appuyer sur <strong>Changer de réseau Wi-Fi</strong>.</div>
       <div class="etape">Choisir la nouvelle box dans la liste des réseaux détectés et saisir son mot de passe.</div>
       <div class="etape">Appuyer sur <strong>Enregistrer et redémarrer</strong>. L'horloge mémorise le nouveau réseau.</div>
@@ -100,12 +126,14 @@
   <section class="bloc-tuto secours">
     <h2>Méthode 2 - Ancienne box en panne ou déjà remplacée</h2>
     <div class="info-secours">
-      <div class="secret"><small>Réseau Wi-Fi de secours</small><strong>Horloge-VSF-Config</strong></div>
-      <div class="secret"><small>Mot de passe</small><strong>VSFhorloge</strong></div>
+      <div class="secret"><small>Horloge 1 - Réseau de secours</small><strong>Horloge-VSF-Config</strong></div>
+      <div class="secret"><small>Horloge 2 - Réseau de secours</small><strong>Horloge2-VSF-Config</strong></div>
+      <div class="secret"><small>Mot de passe des deux réseaux</small><strong>VSFhorloge</strong></div>
+      <div class="secret"><small>Adresse de configuration</small><strong>192.168.4.1</strong></div>
     </div>
     <div class="etapes">
       <div class="etape">Allumer l'horloge et attendre environ <strong>30 secondes</strong>.</div>
-      <div class="etape">Dans les réglages Wi-Fi du téléphone, se connecter à <strong>Horloge-VSF-Config</strong>.</div>
+      <div class="etape">Dans les réglages Wi-Fi du téléphone, se connecter à <strong>Horloge-VSF-Config</strong> ou <strong>Horloge2-VSF-Config</strong> selon l'horloge concernée.</div>
       <div class="etape">Saisir le mot de passe <strong>VSFhorloge</strong>. Si Android affiche « Aucun accès Internet », choisir <strong>Rester connecté</strong>.</div>
       <div class="etape">Appuyer sur le bouton rouge <strong>Ouvrir 192.168.4.1</strong> situé plus haut.</div>
       <div class="etape">Choisir la nouvelle box, saisir son mot de passe puis enregistrer. L'horloge redémarre automatiquement.</div>
@@ -134,48 +162,6 @@
     document.getElementById('contenu').hidden = false;
   }
 
-  const champIp = document.getElementById('ip-horloge');
-  const boutonIp = document.getElementById('ouvrir-ip');
-  const messageIp = document.getElementById('message-ip');
-  const cleIp = 'vsf_horloge_ip_fixe';
-
-  function nettoyerIp(valeur) {
-    return valeur.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
-  }
-
-  function ipValide(ip) {
-    const parties = ip.split('.');
-    return parties.length === 4 && parties.every(p => /^\d{1,3}$/.test(p) && Number(p) >= 0 && Number(p) <= 255);
-  }
-
-  function actualiserLienIp() {
-    const ip = nettoyerIp(champIp.value);
-    boutonIp.href = ipValide(ip) ? 'http://' + ip : '#';
-  }
-
-  const ipMemorisee = localStorage.getItem(cleIp) || '';
-  champIp.value = ipMemorisee;
-  actualiserLienIp();
-
-  champIp.addEventListener('input', () => { messageIp.textContent = ''; actualiserLienIp(); });
-  document.getElementById('sauver-ip').addEventListener('click', () => {
-    const ip = nettoyerIp(champIp.value);
-    if (!ipValide(ip)) {
-      messageIp.textContent = 'Adresse IP invalide.';
-      return;
-    }
-    champIp.value = ip;
-    localStorage.setItem(cleIp, ip);
-    actualiserLienIp();
-    messageIp.textContent = 'Adresse enregistrée sur cet appareil.';
-  });
-
-  boutonIp.addEventListener('click', event => {
-    if (!ipValide(nettoyerIp(champIp.value))) {
-      event.preventDefault();
-      messageIp.textContent = 'Saisissez et enregistrez d’abord l’adresse IP fixe.';
-    }
-  });
 </script>
 </body>
 </html>
