@@ -9,6 +9,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&amp;family=Nunito:wght@400;600;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
 <link href="style.css" rel="stylesheet"/>
 <link href="ImageSite/vsf.ico" rel="icon" type="image/x-icon"/>
+<!-- Moyens de paiement sur place -->
+<style>
+  .vsf-paiement { color: var(--texte, #eef6f2); line-height: 1.4; }
+  .vsf-paiement--accueil { margin-top: 1rem; padding-top: .9rem; border-top: 1px solid rgba(168,217,230,.2); }
+  .vsf-paiement-titre { display: block; font-size: .95rem; font-weight: 800; margin-bottom: .5rem; }
+  .vsf-paiement-grille { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1rem; width: 100%; max-width: 340px; }
+  .vsf-paiement-groupe { min-width: 0; text-align: center; }
+  .vsf-paiement-image { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 2 / 1; }
+  .vsf-paiement-groupe--cb .vsf-paiement-image { aspect-ratio: 1 / 1; }
+  .vsf-paiement-image img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0; }
+  .vsf-paiement-legende { display: block; margin-top: .3rem; font-size: .85rem; font-weight: 800; line-height: 1.4; color: var(--or-clair, #f8cd7c); }
+  .vsf-paiement-groupe--cb .vsf-paiement-legende { color: var(--texte, #eef6f2); }
+  .vsf-paiement-refus { display: block; color: #ffaaa0; }
+  .vsf-paiement--tarifs { width: 390px; max-width: 100%; margin-bottom: 1.5rem; padding: 1rem 1.3rem; border: 1px solid rgba(240,178,62,.25); border-radius: 12px; background: var(--fond-carte, #1b353c); }
+</style>
 </head>
 <body>
 <header class="entete">
@@ -43,6 +58,19 @@
 </section>
 <section class="section section-alt">
 <div class="section-tete"><p class="eyebrow">Tarifs 2025 – 2026</p><h2>Nos tarifs</h2></div>
+<div class="vsf-paiement vsf-paiement--tarifs" role="note" aria-label="Moyens de paiement sur place">
+<strong class="vsf-paiement-titre">Paiement sur place</strong>
+<div class="vsf-paiement-grille">
+<div class="vsf-paiement-groupe">
+<div class="vsf-paiement-image"><img src="ImageSite/paiement-cheques-especes.png" alt="" width="1774" height="887" decoding="async"/></div>
+<span class="vsf-paiement-legende">Chèques ou espèces</span>
+</div>
+<div class="vsf-paiement-groupe vsf-paiement-groupe--cb">
+<div class="vsf-paiement-image"><img src="ImageSite/cb-non-acceptee.png" alt="" width="1448" height="1086" decoding="async"/></div>
+<span class="vsf-paiement-legende">Carte bancaire<span class="vsf-paiement-refus">non acceptée</span></span>
+</div>
+</div>
+</div>
 <table class="donnees">
 <thead><tr><th>Formule</th><th>Tarif</th></tr></thead>
 <tbody>
