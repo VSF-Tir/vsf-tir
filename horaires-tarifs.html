@@ -50,6 +50,10 @@
 <tr><td>Dimanche</td><td>09h – 12h</td></tr>
 </tbody>
 </table>
+<div id="jours-fermeture" style="margin-top:2rem;">
+<div class="section-tete"><h2>Jours de fermeture</h2></div>
+<div id="liste-fermetures" aria-live="polite"><p>Chargement des jours de fermeture…</p></div>
+</div>
 <div class="carte" style="margin-top:2rem;">
 <h3>Nouveau certificat médical</h3>
 <p>À joindre obligatoirement pour la licence. Vous pouvez le télécharger ci-dessous :</p>
@@ -104,5 +108,112 @@
 </footer>
 <script src="script.js"></script>
 <script async="" data-goatcounter="https://vsf-tir.goatcounter.com/count" src="//gc.zgo.at/count.js"></script>
+<script>
+(() => {
+  const URL_BASE = 'https://xndpmjuzdqwexnligrwh.supabase.co';
+  const CLE_PUBLIQUE = 'sb_publishable_Pe-GumqkZJFYJj8trS4rWg_KVO_ANhW';
+  let chargement = false;
+  let datesConnues = null;
+
+  function aujourdHuiParis() {
+    const parties = new Intl.DateTimeFormat('fr-FR', {
+      timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date());
+    const valeur = type => parties.find(p => p.type === type).value;
+    return `${valeur('year')}-${valeur('month')}-${valeur('day')}`;
+  }
+
+  function lendemain(dateISO) {
+    const date = new Date(dateISO + 'T12:00:00Z');
+    date.setUTCDate(date.getUTCDate() + 1);
+    return date.toISOString().slice(0, 10);
+  }
+
+  function regrouperFermetures(dates, aujourdHui) {
+    const periodes = [];
+    [...new Set(dates)].sort().forEach(date => {
+      const precedente = periodes[periodes.length - 1];
+      if (precedente && lendemain(precedente.fin) === date) precedente.fin = date;
+      else periodes.push({ debut: date, fin: date });
+    });
+    // Filtrer après regroupement pour conserver le début d'une fermeture en cours.
+    return periodes.filter(p => p.fin >= aujourdHui);
+  }
+
+  function dateLisible(dateISO, options) {
+    return new Date(dateISO + 'T12:00:00Z').toLocaleDateString('fr-FR', {
+      timeZone: 'Europe/Paris', ...options
+    });
+  }
+
+  function libelleFermeture(periode) {
+    const { debut, fin } = periode;
+    const complet = date => dateLisible(date, { day: 'numeric', month: 'long', year: 'numeric' });
+    if (debut === fin) return 'Fermeture le ' + complet(debut);
+    const memeAnnee = debut.slice(0, 4) === fin.slice(0, 4);
+    const memeMois = debut.slice(0, 7) === fin.slice(0, 7);
+    const premier = memeMois
+      ? dateLisible(debut, { day: 'numeric' })
+      : memeAnnee ? dateLisible(debut, { day: 'numeric', month: 'long' }) : complet(debut);
+    return `Fermeture du ${premier} au ${complet(fin)}`;
+  }
+
+  function afficherFermetures(dates) {
+    const conteneur = document.getElementById('liste-fermetures');
+    conteneur.replaceChildren();
+    const periodes = regrouperFermetures(dates, aujourdHuiParis());
+    if (!periodes.length) {
+      const texte = document.createElement('p');
+      texte.textContent = 'Aucune fermeture prévue.';
+      conteneur.appendChild(texte);
+      return;
+    }
+    const liste = document.createElement('ul');
+    liste.style.paddingLeft = '1.3rem';
+    periodes.forEach(periode => {
+      const ligne = document.createElement('li');
+      ligne.textContent = libelleFermeture(periode);
+      ligne.style.marginBottom = '.5rem';
+      liste.appendChild(ligne);
+    });
+    conteneur.appendChild(liste);
+  }
+
+  async function chargerFermetures() {
+    if (chargement) return;
+    chargement = true;
+    // Actualiser les dates périmées même si la connexion est interrompue.
+    if (datesConnues) afficherFermetures(datesConnues);
+    try {
+      const dates = [];
+      const taillePage = 1000;
+      for (let offset = 0; ; offset += taillePage) {
+        const url = new URL(URL_BASE + '/rest/v1/permanences');
+        url.search = new URLSearchParams({
+          select: 'date', identifiant: 'eq.FERME', order: 'date.asc',
+          limit: String(taillePage), offset: String(offset)
+        }).toString();
+        const reponse = await fetch(url, { headers: { apikey: CLE_PUBLIQUE }, cache: 'no-store' });
+        if (!reponse.ok) throw new Error('Lecture des fermetures impossible');
+        const lignes = await reponse.json();
+        if (!Array.isArray(lignes)) throw new Error('Réponse incorrecte');
+        dates.push(...lignes.map(ligne => ligne.date));
+        if (lignes.length < taillePage) break;
+      }
+      datesConnues = dates;
+      afficherFermetures(dates);
+    } catch (erreur) {
+      console.error('Jours de fermeture :', erreur);
+      if (datesConnues === null) document.getElementById('liste-fermetures').textContent =
+        'Les jours de fermeture sont momentanément indisponibles. Réessayez dans quelques instants.';
+    } finally { chargement = false; }
+  }
+
+  chargerFermetures();
+  setInterval(() => { if (!document.hidden) chargerFermetures(); }, 60000);
+  window.addEventListener('focus', chargerFermetures);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) chargerFermetures(); });
+})();
+</script>
 </body>
 </html>

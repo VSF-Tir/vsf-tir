@@ -84,6 +84,8 @@
   .btn-detail:hover { background: rgba(217,154,61,0.15); border-color: var(--or); }
   .btn-detail.retour { color: var(--texte-att); }
 
+  .champ-reunion { display: block; width: 100%; box-sizing: border-box; margin: .4rem 0 1rem; padding: .7rem; border: 1px solid var(--menthe); border-radius: 8px; background: var(--fond); color: var(--texte); font: inherit; }
+  .carte-detail { max-height: 90vh; overflow-y: auto; }
   /* ===== Version mobile ===== */
   @media (max-width: 600px) {
     .conteneur-perma { padding: 1rem 0.7rem 3rem; }
@@ -496,7 +498,15 @@ if (assigne && assigne.identifiant === 'FERME') {
       if (vert2) personnesVert.push(vert2.prenom + ' ' + vert2.nom);
       carte.appendChild(ligneStatut('🌳', 'Espace vert' + (personnesVert.length ? ' : ' + personnesVert.join(' et ') : '')));
     }
-    if (aReunion) carte.appendChild(ligneStatut('🗂️', 'Réunion de bureau'));
+    if (aReunion) {
+      const reunion = lireReunion(assigne);
+      carte.appendChild(ligneStatut('🗂️', 'Réunion de bureau' + (reunion.heure ? ' — ' + reunion.heure : '')));
+      if (reunion.descriptif) {
+        const description = ligneStatut('📝', reunion.descriptif);
+        description.style.whiteSpace = 'pre-wrap';
+        carte.appendChild(description);
+      }
+    }
     if (aAG) carte.appendChild(ligneStatut('📋', 'Assemblée générale'));
     if (aArmes) carte.appendChild(ligneStatut('🛠️', 'Entretien des armes'));
     if (aArmurerie) carte.appendChild(ligneStatut('🔑', 'Armurerie : ' + armurerie.prenom + ' ' + armurerie.nom));
@@ -519,7 +529,8 @@ if (assigne && assigne.identifiant === 'FERME') {
       if (estAdmin) {
         if (aMembre) actions.appendChild(boutonDetail('🗑️ Supprimer la permanence', () => retirerPermanence(dateStr)));
         if (aVert) actions.appendChild(boutonDetail('🗑️ Supprimer Espace vert', () => retirerEspaceVert(dateStr)));
-        actions.appendChild(boutonDetail(aReunion ? '🗑️ Retirer Réunion de bureau' : '➕ Ajouter Réunion de bureau', () => toggleDepuisDetail('REUNION_BUREAU')));
+        actions.appendChild(boutonDetail(aReunion ? '✏️ Modifier Réunion de bureau' : '➕ Ajouter Réunion de bureau', () => ouvrirEditionReunion(dateStr)));
+        if (aReunion) actions.appendChild(boutonDetail('🗑️ Retirer Réunion de bureau', () => supprimerReunion(dateStr)));
         actions.appendChild(boutonDetail(aAG ? '🗑️ Retirer Assemblée générale' : '➕ Ajouter Assemblée générale', () => toggleDepuisDetail('AG')));
         actions.appendChild(boutonDetail(aArmes ? '🗑️ Retirer Entretien des armes' : '➕ Ajouter Entretien des armes', () => toggleDepuisDetail('ENTRETIEN_ARMES')));
       }
@@ -636,7 +647,7 @@ const estAdmin = sessionData && ADMIN_IDS.includes(sessionData.identifiant);
       const itemEv = document.createElement('div');
       itemEv.className = 'item-menu';
       itemEv.innerHTML = `<span class="pastille-menu" style="background:${ev.couleur};"></span>${actif ? '✓ ' : ''}${ev.icone} ${ev.label}`;
-      itemEv.onclick = () => toggleEvenement(dateStr, ev.tag);
+      itemEv.onclick = () => ev.tag === 'REUNION_BUREAU' ? ouvrirEditionReunion(dateStr) : toggleEvenement(dateStr, ev.tag);
       menu.appendChild(itemEv);
     });
 
@@ -1002,7 +1013,93 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     chargerMois();
   }
 
+  const PREFIXE_REUNION = 'REUNION_DETAILS:';
+
+  function lireReunion(assigne) {
+    const valeur = ((assigne && assigne.evenements) || []).find(e => typeof e === 'string' && e.startsWith(PREFIXE_REUNION));
+    try {
+      const details = valeur ? JSON.parse(decodeURIComponent(valeur.slice(PREFIXE_REUNION.length))) : {};
+      return { heure: typeof details.heure === 'string' ? details.heure : '', descriptif: typeof details.descriptif === 'string' ? details.descriptif : '' };
+    } catch { return { heure: '', descriptif: '' }; }
+  }
+
+  function libelleReunion(details) {
+    return 'Réunion de bureau' + (details.heure ? ' — Heure : ' + details.heure : '') + (details.descriptif ? '\nDescriptif : ' + details.descriptif : '');
+  }
+
+  function ouvrirEditionReunion(dateStr) {
+    if (!sessionData || !ADMIN_IDS.includes(sessionData.identifiant)) return;
+    fermerMenu();
+    const details = lireReunion(permanencesDuMois[dateStr]);
+    const carte = document.getElementById('carte-detail');
+    carte.innerHTML = '';
+    const titre = document.createElement('h3');
+    titre.textContent = 'Réunion de bureau — ' + dateStr.split('-').reverse().join('/');
+    carte.appendChild(titre);
+    const formulaire = document.createElement('form');
+    const champs = {};
+    for (const [nom, libelle, type] of [['heure', 'Heure de la réunion', 'input'], ['descriptif', 'Descriptif (facultatif)', 'textarea']]) {
+      const label = document.createElement('label');
+      label.textContent = libelle;
+      const champ = document.createElement(type);
+      champ.className = 'champ-reunion';
+      champ.value = details[nom];
+      if (nom === 'heure') { champ.type = 'text'; champ.required = true; champ.placeholder = 'Ex. : 18h30'; champ.maxLength = 100; }
+      else { champ.rows = 5; champ.maxLength = 4000; }
+      label.appendChild(champ);
+      formulaire.appendChild(label);
+      champs[nom] = champ;
+    }
+    const statut = document.createElement('p');
+    statut.setAttribute('role', 'status');
+    formulaire.appendChild(statut);
+    const envoyer = document.createElement('button');
+    envoyer.type = 'submit'; envoyer.className = 'btn-detail'; envoyer.textContent = 'Enregistrer';
+    formulaire.appendChild(envoyer);
+    formulaire.onsubmit = async evt => {
+      evt.preventDefault();
+      const details = { heure: champs.heure.value.trim(), descriptif: champs.descriptif.value.trim() };
+      if (!details.heure) { champs.heure.focus(); return; }
+      envoyer.disabled = true; statut.textContent = 'Enregistrement…';
+      try {
+        await enregistrerReunion(dateStr, details);
+        fermerDetail();
+      } catch (erreur) { statut.textContent = erreur.message; }
+      finally { envoyer.disabled = false; }
+    };
+    carte.appendChild(formulaire);
+    carte.appendChild(boutonDetail('← Retour', () => { fermerDetail(); }));
+    document.getElementById('fond-detail').classList.add('ouvert');
+  }
+
+  async function enregistrerReunion(dateStr, details, supprimer = false) {
+    if (!sessionData || !ADMIN_IDS.includes(sessionData.identifiant)) throw new Error('Modification réservée à Serge et Christophe.');
+    const actuel = permanencesDuMois[dateStr];
+    const existante = !!(actuel && (actuel.evenements || []).includes('REUNION_BUREAU'));
+    const evenements = ((actuel && actuel.evenements) || []).filter(e => e !== 'REUNION_BUREAU' && !(typeof e === 'string' && e.startsWith(PREFIXE_REUNION)));
+    if (!supprimer) evenements.push('REUNION_BUREAU', PREFIXE_REUNION + encodeURIComponent(JSON.stringify(details)));
+    const { error } = await sb.from('permanences').upsert({
+      date: dateStr,
+      identifiant: (actuel && actuel.identifiant) || null,
+      nom: (actuel && actuel.nom) || null,
+      prenom: (actuel && actuel.prenom) || null,
+      evenements,
+      updated_at: new Date().toISOString()
+    });
+    if (error) throw new Error('Enregistrement impossible : ' + error.message);
+    await chargerMois();
+  }
+
+  async function supprimerReunion(dateStr) {
+    if (!confirm('Supprimer cette réunion ?')) return;
+    try {
+      await enregistrerReunion(dateStr, lireReunion(permanencesDuMois[dateStr]), true);
+      fermerDetail();
+    } catch (erreur) { alert(erreur.message); }
+  }
+
   async function toggleEvenement(dateStr, tag) {
+    if (tag === 'REUNION_BUREAU') { ouvrirEditionReunion(dateStr); return; }
     const LIBELLES_EVENEMENTS = { ESPACE_VERT: 'Espace vert', REUNION_BUREAU: 'Réunion de bureau', AG: 'Assemblée générale', ENTRETIEN_ARMES: 'Entretien des armes' };
     const actuel = permanencesDuMois[dateStr];
     const evenementsActuels = (actuel && actuel.evenements) ? actuel.evenements : [];

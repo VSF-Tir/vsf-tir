@@ -60,6 +60,8 @@
   .case-jour.disponible { cursor: pointer; border: 1px solid var(--menthe); background: rgba(80,200,150,0.10); }
   .case-jour.disponible:hover { background: rgba(80,200,150,0.18); }
   .case-jour.complet-jour { border: 1px solid var(--rouge); background: rgba(226,64,47,0.10); opacity: 0.75; }
+  .case-jour.jour-ferme { border: 1px solid #ff0000; background: #c0392b; }
+  .case-jour.jour-ferme .badge { color: #fff; background: #8e0000; }
   .case-jour.jour-selectionne { border: 2px solid var(--or); }
   .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
   .case-jour .badge {
@@ -155,6 +157,7 @@
   let moisAffiche = new Date();
   moisAffiche.setDate(1);
   let joursAvecCreneaux = {};
+  let joursFermes = new Set();
   let jourSelectionne = null;
 
   function formaterISO(date) {
@@ -292,11 +295,19 @@
     const dernierJour = new Date(annee, mois + 1, 0);
     const aujourdhui = formaterISO(new Date());
 
-    const { data: creneaux } = await sb
-      .from('creneaux')
-      .select('*')
-      .gte('date', formaterISO(premierJour) > aujourdhui ? formaterISO(premierJour) : aujourdhui)
-      .lte('date', formaterISO(dernierJour));
+    const [{ data: creneaux }, { data: fermetures, error: erreurFermetures }] = await Promise.all([
+      sb.from('creneaux')
+        .select('*')
+        .gte('date', formaterISO(premierJour) > aujourdhui ? formaterISO(premierJour) : aujourdhui)
+        .lte('date', formaterISO(dernierJour)),
+      sb.from('permanences')
+        .select('date')
+        .eq('identifiant', 'FERME')
+        .gte('date', formaterISO(premierJour))
+        .lte('date', formaterISO(dernierJour))
+    ]);
+    if (erreurFermetures) console.error('Chargement des jours fermés impossible', erreurFermetures);
+    joursFermes = new Set((fermetures || []).map(p => p.date));
 
     joursAvecCreneaux = {};
     (creneaux || []).forEach(c => {
@@ -329,10 +340,13 @@
 
     for (let jour = 1; jour <= dernierJour.getDate(); jour++) {
       const dateStr = annee + "-" + String(mois + 1).padStart(2, '0') + "-" + String(jour).padStart(2, '0');
-      const info = joursAvecCreneaux[dateStr];
+      const ferme = joursFermes.has(dateStr);
+      const info = ferme ? null : joursAvecCreneaux[dateStr];
       const case_ = document.createElement('div');
       let classe = 'case-jour';
-      if (info) {
+      if (ferme) {
+        classe += ' jour-ferme';
+      } else if (info) {
         const restantes = info.places - info.prises;
         classe += restantes > 0 ? ' disponible' : ' complet-jour';
       } else {
@@ -341,7 +355,8 @@
       if (dateStr === jourSelectionne) classe += ' jour-selectionne';
       case_.className = classe;
       case_.innerHTML = `<div class="numero">${jour}</div>` +
-        (info ? `<div class="badge">${info.places - info.prises > 0 ? (info.places - info.prises) + " libre(s)" : "Complet"}</div>` : '');
+        (ferme ? '<div class="badge">🔒 Fermé</div>' :
+          (info ? `<div class="badge">${info.places - info.prises > 0 ? (info.places - info.prises) + " libre(s)" : "Complet"}</div>` : ''));
       if (info) case_.onclick = () => afficherJour(dateStr);
       grille.appendChild(case_);
     }
