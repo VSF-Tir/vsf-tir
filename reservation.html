@@ -81,6 +81,7 @@
   }
   .btn-reserver:disabled { background: rgba(143,227,208,0.2); color: var(--texte-att); cursor: not-allowed; }
 </style>
+<script src="vsf-securite.js"></script>
 </head>
 <body>
 <header class="entete">
@@ -227,13 +228,20 @@
 
     const ADMIN_IDS = ["hinser", "dinchr"];
     if (ADMIN_IDS.includes(data.identifiant)) {
-      sessionStorage.setItem('vsf_admin', JSON.stringify(data));
+      if (!window.VSFSecurite) { msg.textContent = "Le module de sécurité est manquant."; return; }
+      if (!await VSFSecurite.demanderMaitre(data, mdp)) return;
+      const profil = { ...data }; delete profil.mot_de_passe;
+      sessionStorage.setItem('vsf_admin', JSON.stringify(profil));
       window.location.href = 'adminbarbaredestroy.html';
       return;
     }
 
+    if (!window.VSFSecurite) { msg.textContent = "Le module de sécurité est manquant."; return; }
+    await VSFSecurite.deconnecter();
+    VSFSecurite.identifierLicencie(id, mdp);
+
     if (data.membre_bureau) {
-      sessionStorage.setItem('vsf_admin', JSON.stringify(data));
+      sessionStorage.setItem('vsf_admin', JSON.stringify({ identifiant: data.identifiant, nom: data.nom, prenom: data.prenom, membre_bureau: data.membre_bureau }));
       window.location.href = 'permanenceplanning.html';
       return;
     }
@@ -248,6 +256,7 @@
   }
 
   function deconnecter() {
+    VSFSecurite.deconnecter();
     utilisateur = null;
     document.getElementById('bloc-login').style.display = 'block';
     document.getElementById('bloc-connecte').style.display = 'none';

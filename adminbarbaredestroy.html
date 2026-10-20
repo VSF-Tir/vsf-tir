@@ -27,6 +27,7 @@
   .lien-admin h3 { font-size: 1.05rem; color: #fff; margin: 0 0 0.3rem; }
   .lien-admin p { margin: 0; color: var(--texte-att); font-size: 0.88rem; }
 </style>
+<script src="vsf-securite.js" data-vsf-protection="admin"></script>
 </head>
 <body>
 <header class="entete">
@@ -98,7 +99,8 @@
     document.getElementById('nom-admin').textContent = data.prenom + " " + data.nom;
   }
 
-  function deconnecterAdmin() {
+  async function deconnecterAdmin() {
+    await VSFSecurite.deconnecter();
     sessionStorage.removeItem('vsf_admin');
     window.location.href = 'reservation.html';
   }
