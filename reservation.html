@@ -62,6 +62,8 @@
   .case-jour.complet-jour { border: 1px solid var(--rouge); background: rgba(226,64,47,0.10); opacity: 0.75; }
   .case-jour.jour-ferme { border: 1px solid #ff0000; background: #c0392b; }
   .case-jour.jour-ferme .badge { color: #fff; background: #8e0000; }
+  .case-jour.jour-cloture { border: 1px solid var(--texte-att); background: var(--fond-carte); }
+  .case-jour.jour-cloture .badge { color: var(--texte-att); background: rgba(185,214,206,.12); }
   .case-jour.jour-selectionne { border: 2px solid var(--or); }
   .case-jour .numero { font-family: var(--police-titre); font-size: 1rem; color: #fff; }
   .case-jour .badge {
@@ -132,6 +134,7 @@
 </div>
 </div>
 <p id="titre-mois" style="color:var(--texte-att);margin-top:-0.5rem;"></p>
+<p>Réservations au 10 mètres : jusqu’à <strong>18 h la veille</strong>, pour les créneaux du matin comme de l’après-midi (heure de Paris).</p>
 <div class="grille-calendrier" id="grille-calendrier"></div>
 <div class="panneau-jour" id="panneau-jour"></div>
 <div class="msg-ok" id="msg-resa"></div>
@@ -295,6 +298,46 @@
     chargerMois();
   }
 
+  function instantParis(maintenant = new Date()) {
+    const parties = new Intl.DateTimeFormat('fr-FR', {
+      timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', hourCycle: 'h23'
+    }).formatToParts(maintenant);
+    const valeur = type => parties.find(p => p.type === type).value;
+    return { date: `${valeur('year')}-${valeur('month')}-${valeur('day')}`, heure: Number(valeur('hour')) };
+  }
+
+  function reservationsCloses(dateCreneau, maintenant = new Date()) {
+    const veille = new Date(dateCreneau + 'T12:00:00Z');
+    veille.setUTCDate(veille.getUTCDate() - 1);
+    const dateLimite = veille.toISOString().slice(0, 10);
+    const paris = instantParis(maintenant);
+    return paris.date > dateLimite || (paris.date === dateLimite && paris.heure >= 18);
+  }
+
+  function actualiserCloture() {
+    if (!utilisateur) return;
+    const annee = moisAffiche.getFullYear();
+    const mois = moisAffiche.getMonth();
+    dessinerCalendrier(annee, mois, new Date(annee, mois, 1), new Date(annee, mois + 1, 0));
+    document.querySelectorAll('.btn-reserver[data-date-reservation]').forEach(bouton => {
+      const cloture = reservationsCloses(bouton.dataset.dateReservation);
+      const complet = bouton.dataset.complet === 'true';
+      bouton.disabled = cloture || complet;
+      bouton.textContent = cloture ? 'Réservations closes' : complet ? 'Complet' : 'Réserver';
+    });
+  }
+
+  // Réagir à 18 h même si la page est restée ouverte, ou au retour sur l'onglet.
+  let dernierEtatCloture = '';
+  setInterval(() => {
+    const paris = instantParis();
+    const etat = paris.date + (paris.heure >= 18 ? '-soir' : '-jour');
+    if (etat !== dernierEtatCloture) { dernierEtatCloture = etat; actualiserCloture(); }
+  }, 1000);
+  window.addEventListener('focus', actualiserCloture);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) actualiserCloture(); });
+
   async function chargerMois() {
     const annee = moisAffiche.getFullYear();
     const mois = moisAffiche.getMonth();
@@ -302,7 +345,7 @@
 
     const premierJour = new Date(annee, mois, 1);
     const dernierJour = new Date(annee, mois + 1, 0);
-    const aujourdhui = formaterISO(new Date());
+    const aujourdhui = instantParis().date;
 
     const [{ data: creneaux }, { data: fermetures, error: erreurFermetures }] = await Promise.all([
       sb.from('creneaux')
@@ -351,13 +394,14 @@
       const dateStr = annee + "-" + String(mois + 1).padStart(2, '0') + "-" + String(jour).padStart(2, '0');
       const ferme = joursFermes.has(dateStr);
       const info = ferme ? null : joursAvecCreneaux[dateStr];
+      const cloture = !!info && reservationsCloses(dateStr);
       const case_ = document.createElement('div');
       let classe = 'case-jour';
       if (ferme) {
         classe += ' jour-ferme';
       } else if (info) {
         const restantes = info.places - info.prises;
-        classe += restantes > 0 ? ' disponible' : ' complet-jour';
+        classe += cloture ? ' jour-cloture' : restantes > 0 ? ' disponible' : ' complet-jour';
       } else {
         classe += ' vide-sans-creneau';
       }
@@ -365,7 +409,7 @@
       case_.className = classe;
       case_.innerHTML = `<div class="numero">${jour}</div>` +
         (ferme ? '<div class="badge">🔒 Fermé</div>' :
-          (info ? `<div class="badge">${info.places - info.prises > 0 ? (info.places - info.prises) + " libre(s)" : "Complet"}</div>` : ''));
+          (info ? `<div class="badge">${cloture ? "Réservations closes" : info.places - info.prises > 0 ? (info.places - info.prises) + " libre(s)" : "Complet"}</div>` : ''));
       if (info) case_.onclick = () => afficherJour(dateStr);
       grille.appendChild(case_);
     }
@@ -381,7 +425,9 @@
 
     const { data: creneaux } = await sb.from('creneaux').select('*').eq('date', dateStr).order('heure_debut', { ascending: true });
 
+    const cloture = reservationsCloses(dateStr);
     let html = `<h3>${formaterDateLongue(dateStr)}</h3>`;
+    if (cloture) html += '<p>Les réservations pour cette journée sont closes depuis 18 h la veille (heure de Paris).</p>';
     (creneaux || []).forEach(c => {
       const restantes = c.places_max - c.places_prises;
       const complet = restantes <= 0;
@@ -389,8 +435,8 @@
         <div class="creneau-jour">
           <span class="heure">${c.heure_debut} – ${c.heure_fin}</span>
           <span class="places">${complet ? "Complet" : restantes + " place(s)"}</span>
-          <button class="btn-reserver" ${complet ? "disabled" : ""} onclick="reserver(${c.id}, ${c.places_prises})">
-            ${complet ? "Complet" : "Réserver"}
+          <button class="btn-reserver" data-date-reservation="${dateStr}" data-complet="${complet}" ${cloture || complet ? "disabled" : ""} onclick="reserver(${c.id}, ${c.places_prises})">
+            ${cloture ? "Réservations closes" : complet ? "Complet" : "Réserver"}
           </button>
         </div>
       `;
@@ -431,6 +477,19 @@
     const msg = document.getElementById('msg-resa');
     msg.textContent = "";
 
+    const { data: creneau, error: erreurCreneau } = await sb.from('creneaux').select('date').eq('id', creneauId).maybeSingle();
+    if (erreurCreneau || !creneau) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "Créneau indisponible. Recharge la page.";
+      return;
+    }
+    if (reservationsCloses(creneau.date)) {
+      msg.style.color = "#ff8a75";
+      msg.textContent = "Réservations closes : la limite est fixée à 18 h la veille (heure de Paris).";
+      actualiserCloture();
+      return;
+    }
+
     const { error: erreurInsert } = await sb.from('reservations').insert({
       identifiant: utilisateur.identifiant,
       creneau_id: creneauId,
@@ -440,7 +499,10 @@
 
     if (erreurInsert) {
       msg.style.color = "#ff8a75";
-      msg.textContent = "Erreur lors de la réservation, réessaie.";
+      msg.textContent = erreurInsert.message && erreurInsert.message.includes('RESERVATIONS_CLOTUREES')
+        ? "Réservations closes : la limite est fixée à 18 h la veille (heure de Paris)."
+        : "Erreur lors de la réservation, réessaie.";
+      actualiserCloture();
       return;
     }
 
