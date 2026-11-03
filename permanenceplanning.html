@@ -1001,17 +1001,31 @@ function ouvrirSousMenuEspaceVert(dateStr, caseElement) {
     }
     const ancienNom = (ancien && ancien.identifiant !== 'FERME' && ancien.identifiant !== membre.identifiant)
       ? (ancien.prenom + " " + ancien.nom) : null;
-
-    await sb.from('permanences').upsert({
-      date: dateStr,
+    const attribution = {
       identifiant: membre.identifiant,
       nom: membre.nom,
       prenom: membre.prenom,
       updated_at: new Date().toISOString()
-    });
+    };
+    try {
+      // Un échange est un UPDATE : un upsert déclenche aussi le contrôle INSERT.
+      const requete = dejaCreee
+        ? sb.from('permanences').update(attribution).eq('date', dateStr)
+        : sb.from('permanences').upsert({ date: dateStr, ...attribution });
+      const { data, error } = await requete.select('date');
+      if (error) throw error;
+      if (!data || data.length !== 1) {
+        throw new Error("La permanence n’a pas été modifiée. Actualisez le planning et reconnectez-vous si nécessaire.");
+      }
+    } catch (erreur) {
+      console.error('assignerPermanence:', erreur);
+      alert("Échange non enregistré : " + (erreur.message || "Connexion indisponible. Réessayez."));
+      return;
+    }
     notifierSiBesoin(dateStr, "attribue", membre.prenom + " " + membre.nom, ancienNom);
     fermerMenu();
-    chargerMois();
+    fermerDetail();
+    await chargerMois();
   }
 
   const PREFIXE_REUNION = 'REUNION_DETAILS:';
